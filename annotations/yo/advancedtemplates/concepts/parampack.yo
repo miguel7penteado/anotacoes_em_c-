@@ -1,0 +1,32 @@
+Concepts may also be applied to variadic templates. Here is an example of a
+variadic function template that returns the sum of the sizes of its arguments:
+        verb(        // assume this function template is available:
+    template <typename First, typename  ...Types>
+    int sum(First const &first, Types const &...types);
+    
+    template <typename ...Types>
+    size_t sumFun(Types const &...obj)
+    {
+        return sum(std::forward<Types const &>(obj)...);
+    })
+
+The auxiliary function template tt(sum) uses tt(first.size()) to determine the
+size of its first argument. This assumes that each type offers a member
+tt(size) returning a tt(size_t). Passing arrays or primitive typed arguments
+to tt(sumFun) clearly fails, as these arguments do not offer tt(size)
+members. To ensure that passed arguments em(do) have tt(size) members define a
+concept tt(HasSize):
+        verbinsert(-ns4 //hassize examples/parampacks.cc)
+
+Next, redefine tt(sumFun) so that it requires types satisfying tt(HasSize):
+        verbinsert(-ns4 //sumfun examples/parampacks.cc)
+
+A similar procedure can be used with class templates. To define a class
+template tt(SizeTypes) whose template type arguments should all support a
+tt(size) member tt(SizeTypes') template header specifies tt(HasSize) instead
+of just tt(typename):
+        verbinsert(-ns4 //sizetypes examples/parampacks.cc)
+
+Such tt(SizeTypes) objects can be defined without types, or with any series of
+types that support tt(size) members, but not with basic- or array types:
+        verbinsert(-n //use examples/parampacks.cc)

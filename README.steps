@@ -1,0 +1,66 @@
+Internal Use Only
+
+    build docs          - Create new version
+
+    build distclean     - Cleanup
+
+    sourcetar d         - Install debian tarball
+
+    xd ga               - git debian location
+
+    git-pre             - pull latest debian release
+
+    cd debian/debian    - update changelog, compat, control
+
+    trim changelog      - rm trailing ws
+
+    --
+
+    git-build           - build the debian archive
+
+root:
+    dpkg -i wip/c++-annotations-html_*.deb  - install the archive
+
+    [verify html changes are as intended]
+
+--------------------------------------------------------------------------
+
+    xd sa                       - source directory
+
+    build distclean             - cleanup
+
+    xd gas                      - dir. to change to gitlab
+        
+    git co web-pages            - gitlab web-pages branch
+
+    update                      - upload to gitlab
+
+
+    xd gc                       - cppannotations-zip
+
+    git ci -am  'Zips of the new major release 11.0.0'  (or comparable)
+
+    git push
+
+    git tag 11.1.0 -sm '11.1.0 Release Tag'             (or comparable)
+
+    git push --tags
+
+
+    xd sa                       - source directory
+
+    git tag 11.1.0 -sm '11.1.0 Release Tag'             (or comparable)
+
+    git push --tags
+
+
+
+    xd ga                       - git/annotations directory
+
+    git-post                    - upload to debian
+
+
+
+
+    
+

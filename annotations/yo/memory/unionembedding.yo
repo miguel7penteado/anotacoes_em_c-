@@ -1,0 +1,136 @@
+The unrestricted union becomes a data member of the surrounding aggregate
+(e.g., tt(class Data)). The tt(class Data) is provided with a data member
+tt(Union::Field d_field) and tt(Data)'s users might query the currently active
+field from, e.g., an accessor tt(field):
+
+        verb(    class Data
+    {
+        Union::Field d_field;
+        Union d_union;
+    
+        public:
+            Data(int value = 0);
+            Data(Data const &other);
+            Data(Data &&tmp);
+            Data(std::string const &text);
+
+            ~Data();                // empty body
+
+            Union::Field field() const;
+            ...
+    };)
+
+tt(Data)'s constructors receive tt(int) or tt(string) values. To pass these
+values to tt(d_union), we need tt(Union) constructors for the various union
+fields.
+
+The unrestricted union itself starts out like this:
+        verb(    union Union
+    {
+        enum Field
+        {
+            TEXT,
+            VALUE
+        };
+    
+        private:
+            std::string u_text;
+            int u_value;
+    
+        public:
+            Union(Union const &other) = delete;
+            ~Union();               // empty
+    
+            Union(int value);
+            Union(std::string const &text);
+
+            Union(Union const &other, Field type);
+            Union(Union &&tmp, Field type);
+            ...
+    };)
+
+The last two tt(Union) constructors are comparable to the standard copy-
+and move constructors. With unrestricted unions, however, the existing union's
+actual type needs to be specified so that the correct field is initialized.
+To simplify the generalization to other types we apply a procedure that is
+comparable to the procedure we followed for destroying an understricted union:
+we define a static array of pointers to copy-functions. This array is declared
+in the union's private section as
+        verb(    static void (Union::*s_copy[])(Union const &other);)
+
+and it is defined as:
+        verb(    void (Union::*Union::s_copy[])(Union const &other) = 
+    {
+        &Union::copyText,
+        &Union::copyValue
+    };)
+
+The tt(copyText) and tt(copyValue) private members are responsible for
+copying tt(other's) data fields. However, there is a little snag. Although
+basic types can directly be assigned, class-type fields cannot.  Destination
+fields cannot be initialized using member initializers as the field to
+initialize depends on the tt(Field) type that's passed to the
+constructor. Because of that the initialization must be performed inside the
+constructors' bodies. At that point the data fields are
+merely a series of uninitialized bytes, and so placement new is used to
+copy-construct class-type fields. Here are the implementations of the copy
+functions:
+        verb(    void Union::copyValue(Union const &other)
+    {
+        u_value = other.u_value;
+    }
+
+    void Union::copyText(Union const &other)
+    {
+        new(&u_text) string{ other.u_text };
+    })
+
+When implementing the union's move constructor other considerations must be
+taken into account. Since we're free to do whatever we want with the move
+constructor's tt(Union &&tmp) object, we can simply grab its current field,
+and store a tt(VALUE) type of value into tt(tmp). For that we use the
+tt(Union's) tt(swap) facility, the current object's field, another tt(Union)
+object, and the other tt(Union's) field type (swapping is discussed in the
+next section). Of course, if there isn't any primitive typed field this
+doesn't work. In that case field-specific move functions must be used,
+comparable to the ones used when copy-constructing a tt(Union) object.
+
+Now we're ready for the constructors' implementations:
+        verb(    Union::Union(std::string const &text)
+    :
+        u_text(text)
+    {}
+    
+    Union::Union(int value)
+    :
+        u_value(value)
+    {}
+
+    Union::Union(Union &&tmp, Field type)
+    {
+        swap(VALUE, tmp, type);
+    }
+
+    Union::Union(Union const &other, Field type)
+    {
+        (this->*s_copy[type])(other);
+    }
+
+    Data::Data(Data const &other)
+    :
+        d_field(other.d_field),
+        d_union(other.d_union, d_field)
+    {}
+
+    Data::Data(int value)
+    :
+        d_field(Union::VALUE),
+        d_union(value)
+    {}
+    
+    Data::Data(Data const &other)
+    :
+        d_field(other.d_field),
+        d_union(other.d_union, d_field)
+    {})
+

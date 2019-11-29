@@ -1,0 +1,79 @@
+    Objects of the class tt(path) can be handled in various ways:
+    itemization(
+    itt(path &append(Type const &arg)) or 
+                                tt(path &operator/=(Type const &arg)):nl()
+       the arguments that can be passed to the constructors can also be passed
+        to these members. The tt(arg) argument is separated from the path's
+        current content by a directory separator (unless the path is initially
+        empty as in tt(cout << path{}.append("entry"))). See also tt(concat),
+        below;
+
+    itt(void clear()): the tt(path's) content is erased;
+
+    itt(int compare(Type const &other)):nl()
+       returns the result of lexicographically comparing the current path's
+        content with tt(other). tt(Other) can be a tt(path), a string-type or
+        an NTBS;
+
+    itt(path &concat(Type const &arg)) or 
+                                tt(path &operator+=(Type const &arg)):nl()
+       similar to tt(append), but em(no) directory separator is used when
+        adding tt(arg) to the current tt(path);
+
+    itt(path &remove_filename()):nl()
+       removes the last component of the stored path. If only a root-directory
+        is stored, then the root directory is removed. Note that the last
+        directory separator is kept, unless it is the only path element;
+
+    itt(path &replace_extension(path const &replacement = path{} )):nl()
+       replaces the extension of the last component of the stored path
+        (including the extension's dot) with tt(replacement). The extension is
+        removed if tt(replacement) is empty. If the tt(path) calling
+        tt(replace_extension) has no extension then tt(replacement) is added.
+        The replacement may optionally start with a dot. The path object's
+        extension receives only one dot;
+
+    itt(path &replace_filename(path const &replacement)):nl()
+       replaces the last component of the stored path with tt(replacement),
+        which itself may contain multiple path elements.  If only a
+        root-directory is stored, then it is replaced by tt(replacement). The
+        member's behavior is undefined if the current path object is empty;
+    )
+
+    hi(path: as string/NTBS) Accessors (no arguments, const members) return
+the path's content in various forms, depending on the used accessor member:
+tt(c_str) returns an NTBS, tt(string, wstring, u8string, u16string, u32string)
+(possibly prefixed by tt(generic_), like tt(generic_string)) returns a
+string-type of object. Example:
+        verb(    path ulb{ "/usr/local/bin" };
+    cout << ulb.string() << '\n';      // shows:   /usr/local/bin)
+
+    hi(path: stream insertion) Double quotes surround the displayed path name
+when inserting a tt(path) object into a stream. The double quotes are omitted
+when accessing the path's content as an NTBS or as a string, and also when
+assigning (or casting) tt(path) objects to strings.
+
+    hi(path: stream extraction) When extracting tt(path) objects from streams
+the path name that is extracted may optionally be surrounded by double
+quotes. The extracted path contains one set of surrounding quotes.
+
+    hi(path: component iterators) All of the tt(path's) components are
+sequentially accessed using its tt(begin) and tt(end) iterators: each
+component is returned as a tt(path). If available root names and root
+directories are returned as initial components, followed by the individual
+directories and finally filename components. The directory separators
+themselves are not returned when iterating over a tt(path's) components.
+
+    hi(path: component accessors)
+    hi(path: decomposers) Path components may also directly be obtained (if a
+component isn't present then an empty tt(path) component is returned). The
+following em(decomposers) are available: tt(root_name, root_directory,
+root_path, relative_path, parent_path) ( returning the current path-content
+from which the last element has been removed), tt(filename, stem) (returning
+the filename without its dot-extension), and tt(extension). Example:
+        verb(    path ulb{ "/usr/local/bin" };
+    cout << ulb.relative_path() << '\n';    // shows:  "usr/local/bin"
+                                            // (note the double quotes))
+
+When prefixed by tt(has_) the member returns a tt(bool) which is tt(true)
+if the component is present. Also available: tt(is_absolute, is_relative).

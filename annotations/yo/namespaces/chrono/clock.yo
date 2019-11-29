@@ -1,0 +1,73 @@
+Clocks are used for measuring time. bf(C++) offers several predefined
+emi(clock) types, and all but one of them are defined in the tt(std::chrono)
+namespace. The exception is the clock tt(std::filesystem::__file_clock) (see
+section ref(FILECLOCK) for its details).
+
+Before using the tt(chrono) clocks the tthi(chrono) header file must be
+included.
+
+We need clock types when defining points in time (see the next section).  All
+predefined clock types define the following types:
+    itemization(
+    it() the clock's duration type: tt(Clock::duration) (predefined clock
+        types use tt(nanoseconds)). E.g., tt(system_clock::duration
+        oneDay{ 24h });
+
+    it() the clock's resolution type: tt(Clock::period)
+        (predefined clock types use tt(nano)). E.g.,
+        tt(cout << system_clock::period::den << '\n');
+
+    it() the clock's type that is used to store amounts of time:
+        tt(Clock::rep) (predefined clock types use
+        tt(int64_t)). E.g., tt(system_clock::rep amount = 0);
+
+    it() the clock's type that is used to store time points (described in the
+        next section): tt(Clock::time_point) (predefined clock types use
+        tt(time_point<system_clock, nanoseconds>)) E.g.,
+        tt(system_clock::time_point start).
+    )
+
+    All predefined clock types have a member ti(now) returning the clock's
+tt(time_point) corresponding to the current time (relative to the clock's
+epoch). It is a static member and can be used
+this way:
+    tt(system_clock::time_point tp = system_clock::now()).
+
+There are three predefined clock types in the chrono namespace:
+    itemization(
+        iti(system_clock) is the `wall clock', using the system's real time
+            clock;
+        iti(steady_clock) is a clock whose time increases in parallel with the
+            increase of real time;
+        iti(high_resolution_clock) is the computer's fastest clock (i.e., the
+            clock having the shortest timer-tick interval). In practice this is
+            the same clock as tt(system_clock).
+    )
+
+The tt(__file_clock) is defined in the tt(std::filesystem) namespace (
+covered in section ref(FILECLOCK)).
+
+In addition to tt(now) the classes tt(system_clock) and
+tt(high_resolution_clock) (referred to as tt(Clock) below) offer these two
+static members:
+    itemization(
+    itht(to_time_t)
+        (std::time_t Clock::to_time_t(Clock::time_point const &tp))nl()
+         a tt(std::time_t)hi(time_t) value (the same type as returned
+by bf(C)'s bf(time)(2) function) representing the same point in
+time as tt(timePoint). 
+
+    itht(from_time_t)(Clock::time_point Clock::from_time_t(std::time_t
+seconds))nl() 
+    a tt(time_point) representing the same point in time as tt(time_t).
+    )
+
+The example illustrates how these functions can be called:
+        verb(    system_clock::from_time_t(
+        system_clock::to_time_t(
+            system_clock::from_time_t(
+                time(0);
+            )
+        )
+    );)
+

@@ -1,0 +1,46 @@
+Since the introduction of header files in the bf(C) language header files have
+been the main tool for declaring elements that are not defined but are used 
+in source files. E.g., when using tt(printf) in tt(main) the preprocessor
+directive tt(#include <stdio.h>) had to be specified.
+
+This method still works in bf(C++), but gradually proved to be
+inefficient. One reason being that header files have to be processed again for
+every source file of a set of source files each including that header
+file. The drawback of this approach quickly becomes apparent once classes are
+used, as the compiler will repeatedly have to process the class's header file
+for each source file using that class. Usually it's not just that one header
+file, but header files tend to include other header files, resulting in an
+avalanche of header files that must be processed by the compiler again and
+again for every single source file that the compiler must compile. If a
+typical source file includes em(h) header files, and em(s) source
+files must be compiled, then that results in a significant compilation load,
+as the compiler must process em(s * h) header files.
+
+Precompiled headers hi(header: precompiled) offered an initial attempt to
+reduce this excessive workload. But precompiled headers have problems of their
+own: they're enormously big (a precompiled header file of less than 100 bytes
+can easily result in a precompiled header of 25 MB or more), and they're kind
+of fragile: simply recompiling a header if it's younger than its precompiled
+form may quickly result in much overhead, e.g., if merely some comment is
+added to the header.
+
+Another common defense mechanism encountered in traditional headers is the use
+of em(include guards), ensuring that a header file is processed once if it is
+included by multiple other header files. Such include guards are macros, and
+were extensively discussed in section ref(CLASSHEADER). Include guards work,
+but completely depend on the uniqueness of the guard-identifier, which is
+usually a long name, written in capitals using several underscores to
+increase the probability of their uniqueness.
+
+By offering em(modules) the C2a standard provides solutions to the problems
+mentioned above. At the time of this writing the Gnu tt(g++) compiler doesn't
+yet support modules, but the ti(clang++) compiler (cf. 
+    hi(clang: http://clang.llvm.org) lurl(http://clang.llvm.org)) does. The
+current section therefore heavily depends on clang's documentation of modules
+provided in hi(Modules.html) lurl(http://clang.llvm.org/docs/Modules.html) and
+is subject to future changes once the modules definition and implementation of
+the C2a standard reaches its final stage. In this section it is assumed that
+a fairly recent clang compiler is available.
+
+
+

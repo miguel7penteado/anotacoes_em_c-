@@ -1,0 +1,32 @@
+Class templates can be partially specialized. Specializations are commonly
+used to fine-tune implementations for specific types. Concepts can also be
+used to define specializations. Consider a tt(struct Handler) having the
+following generic implementation:
+    verbinsert(-ns4 //generic examples/specializations.cc)
+
+    In addition to possibly type-related specializations (like a tt(struct
+Handler<Tp *> ...)) a specialization requiring the availability of the
+addition operator on tt(Tp) can be defined by requiring the concept
+tt(Addable):
+    verbinsert(-ns4 //addable examples/specializations.cc)
+
+    When used in the following program (assuming all required headers were
+included), the first line of the output shows em(Generic Handler), while
+the second line shows em(Handler for types supporting operator+):
+    verbinsert(-ns4 //use examples/specializations.cc)
+    
+    The compiler, compiling tt(main's) first statement, first looks for
+a specialized version of tt(Handler). Although it finds one, that
+specialization requires the availability of tt(operator+). As that operator is
+not available for tt(std::vector) the compiler does not use that
+specialization. Had this been the only available implementation, then the
+compiler would have reported a tt(constraints not satisfied) error. However,
+there's still the generic definition which em(can) be used for
+tt(std::vector). Therefore the compiler uses the generic definition (which is
+at the same time provides a nice illustration of the SFINAE (cf. section
+ref(SFINAE)) principle). 
+
+When instantiating the second tt(Handler) object the addition operator em(is)
+available, and so in that case the compiler selects the specialized version:
+where available, specializations are used; if not, then generic template
+definitions are used.

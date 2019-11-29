@@ -1,0 +1,35 @@
+    hi(binary_search)
+    itemization(
+        it() Header file: tt(<algorithm>)
+        it() Function prototypes:
+        itemization(
+            itt(bool binary_search(ForwardIterator first, ForwardIterator
+last, Type const &value);)
+            itt(bool binary_search(ForwardIterator first, ForwardIterator
+last, Type const &value, Comparator comp);)
+        )
+        it() Description:
+        itemization(
+            it() The first prototype: tt(value) is looked up using binary
+search in the series of elements implied by the iterator range rangett(first,
+last). The elements in the range must have been sorted by the
+tt(Type::operator<) function. tt(True) is returned if the element was found,
+tt(false) otherwise.
+            it() The second prototype: tt(value) is looked up using binary
+search in the series of elements implied by the iterator range rangett(first,
+last). The elements in the range must have been sorted by the tt(Comparator)
+function object. tt(True) is returned if the element was found, tt(false)
+otherwise. As illustrated by the following example, the function object
+function's first parameter refers to an element in the iterator range, while
+the function object's second parameter refers to tt(value).
+        )
+        it() Example:
+        verbinclude(-a examples/binarysearch.cc)
+    )
+
+If tt(value) is in fact present in the range of values, then this generic
+algorithm doesn't answer the question where tt(value) is located. If that
+question must be answered the generic algorithms link(lower_bound)(LOWERBOUND)
+and link(upper_bound)(UPPERBOUND) can be used. Refer to section
+ref(UPPERBOUND) for an extensive example illustrating the use of these latter
+two algorithms.

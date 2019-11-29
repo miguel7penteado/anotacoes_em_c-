@@ -1,0 +1,94 @@
+In section ref(ERRORCODE) the class tt(std::error_code) was introduced. One of
+its constructors accepts ti(ErrorCodeEnum) values, where tt(ErrorCodeEnum) is
+a template type name for enumerations that we may define ourselves containing
+symbols that are used as error code values. Another constructor expects an
+tt(int)-valued error code and a specification of an error category that uses
+those error codes.
+
+Several error code enumerations and error categories are predefined by bf(C++)
+but it is also possible to define new tt(ErrorCodeEnums) and error
+categories. In this section constructing new tt(ErrorCodeEnums) is covered, in
+the next section designing new error categories is covered.
+
+Defining new error code enumerations is an option when using tt(error_code)
+objects is attractive, but standard error code values (like the values defined
+by tt(enum class errc)) aren't appropriate. For example, when designing an
+interactive calculator, several errors may be encountered that are related to
+the way expressions are entered by the user. For those situations you might
+want to develop your own error code enumeration.
+
+In this and the next section a bare bones approach to defining error code
+enumerations and error categories is adopted. No concrete, real-life like
+class is developed. I think the advantage of this is that this way it's easier
+to apply the principles to new real-life situations than if you first have to
+abstract the content of a real-life example yourself. Here we go:
+   itemization(
+   it() Our first step consists of defining our own enumeration. The
+    enumeration contains symbols listing causes of errors. Newly defined
+    error code enumerations must not associate value 0 with any of its
+    symbols, as by convention value 0 indicates `no error'. 
+
+    The tt(enum class CatErr) lists causes of errors that are associated
+    with our (as yet to be designed) error category: 
+        verbinsert(-s4 //caterr examples/errcode/category/category.h)
+           
+   it() By itself, defining an tt(enum class) does not allow us to pass its
+    values to tt(error_code) constructors. Before we can do that the tt(enum)
+    must be `promoted' to an emi(error_code_enum). This `promotion' is
+    realized by specializing the trait class
+    hi(is_error_code_enum)tt(std::is_error_code_enum) after which the
+    tt(error_code(ErrorCodeEnum)) member template and the tt(make_error_code)
+    function accept tt(CatErr) enumeration values. Interestingly, this
+    requires us to add code to the tt(std) namespace. Normally this is not
+    allowed, but in this case it is. The bf(C++) standard states:
+
+    quote(20.5.4.2.1 Namespace std
+    
+        The behavior of a C++ program is undefined if it adds declarations or
+        definitions to namespace std or to a namespace within namespace std
+        unless otherwise specified.
+        
+        A program may add a template specialization for any standard library
+        template to namespace std only if the declaration depends on a
+        user-defined type and the specialization meets the standard library
+        requirements for the original template and is not explicitly
+        prohibited.  
+    ) 
+
+    Here is how the tt(is_error_code_enum) trait class is specialized:
+        verbinsert(-s4 //iscodeenum examples/errcode/category/category.h)
+    )
+    
+This completes the definition of our own error code enumeration, whose symbols
+are now accepted by tt(error_code's) constructor.
+
+Before we're able to design our own error category we must also have a look at
+`higher order' causes of errors as represented by objects of the class
+tt(std::error_condition) (cf. section ref(ERRCOND)). Error conditions
+represent platform independent errors like syntax errors or non-existing
+requests.
+
+In our bare bones implementation of an error category these higher order
+causes of errors are enumerated in the tt(enum class Cond) enumeration. It's
+defined similarly to tt(CatErr).
+   itemization(
+   it() Our first step consists of defining the enumeration. As with error
+    code enums its symbols should not be given the value 0. Here is the
+    enumeration tt(Cond) whose symbols presumably represent platform
+    independent causes of errors: 
+   verbinsert(-s4 //cond examples/errcode/category/category.h)
+           
+   it() By itself, defining an tt(enum class) does not allow us to pass its
+    values to tt(error_condition) constructors. Before we can do that the
+    tt(enum) must be `promoted' to an emi(error_condition_enum). Also similar
+    to tt(CatErr) this `promotion' is realized by specializing the trait class
+    hi(is_error_condition_enum)tt(std::is_error_condition_enum)
+
+    Here is how the tt(is_error_condition_enum) trait class is specialized:
+        verbinsert(-s4 //iscondenum examples/errcode/category/category.h)
+    )
+
+We're now ready for designing our own tt(error_category) class.
+
+
+

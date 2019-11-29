@@ -1,0 +1,68 @@
+Although the compiler won't provide (default) implementations for constructors
+and destructors of unrestricted unions, em(we) can (and em(must)). The task
+isn't difficult, but there are some caveats.
+
+Consider our unrestricted union's destructor. It clearly should destroy
+tt(u_string)'s data if that is its currently active field; but it should do
+nothing if tt(u_int) is its currently active field. But how does the
+destructor know what field to destroy? It doesn't, as the unrestricted union
+contains no information about what field is currently active.
+
+This problem is tackled by embedding the unrestricted union in a larger
+aggregate (like a class or a struct) where it becomes a regular data
+member. We still consider the unrestricted union a data type by itself, but
+its use requires caution. The surrounding class is provided with a em(d_field)
+data member keeping track of the currently active union-field. The tt(d_field)
+value is an enumeration value which is defined by the union. The actual use of
+the unrestricted union is completely controlled by the aggregate, freeing the
+aggregate's users from any administration related to the unrestricted union.
+
+Using this design we start out with an explicit and empty implementation of
+the destructor, as there's no way to tell the destructor itself what field to
+destroy:
+        verb(    Data::Union::~Union()
+    {};)
+
+Nevertheless, unrestricted unions must properly destroy their class-type
+fields. Since an unrestricted union itself doesn't know what its active field
+is, it must be informed about that by its surrounding class. To simplify the
+generalization to other types a static array of pointers to functions
+destroying the current field's value is used. This array is defined in the
+union's private section as
+        verb(    static void (Union::*s_destroy[])();)
+
+and it is initialized as:
+        verb(    void (Union::*Union::s_destroy[])() = 
+    {
+        &Union::destroyText,
+        &Union::destroyValue
+    };)
+
+Primitive data types normally don't need any special attention when they
+go out of scope, so tt(destroyValue) can be defined as an empty function:
+        verb(    void Union::destroyValue()
+    {})
+
+On the other hand, the member tt(destroyText) must explicitly call
+tt(u_text's) destructor:
+        verb(    void Union::destroyText()
+    {
+        u_text.std::string::~string();
+    })
+
+Proper destruction can now be realized by a single function tt(void
+destroy(Field field)) which simply calls the appropriate function:
+        verb(    void Union::destroy(Field type)
+    {
+        (this->*s_destroy[type])();
+    })
+
+Since the unrestricted union is defined as a data member of a surrounding
+class, the surrounding class's destructor is responsible for the proper
+destruction of its unrestricted union. As the surrounding class keeps track of
+the currently active unrestricted union's field its implementation is easy:
+        verb(    Data::~Data()
+    {
+        d_union.destroy(d_field);
+    })
+

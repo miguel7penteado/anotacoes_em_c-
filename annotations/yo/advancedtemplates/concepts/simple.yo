@@ -1,0 +1,22 @@
+We've already encountered various examples of em(simple requirements): they
+specify the operations that must be supported by the variable(s) declared in
+the bodies of tt(requires) specifications. When the requirements refer to the
+individual variables single tt(Type) parameters suffice; when the requirements
+involve multiple variables tt(requires) specifications declaring more
+variables are used. When both are required they can be combined in a single
+concept definition using tt(and) to combine the tt(requires) specifications as
+shown by the example:
+    verbinclude(-sn4 //addable examples/simple.cc)
+
+Specifying a constraint does not necessarily imply that the literal constraint
+specification will run-time be satisfied. E.g., to require the existence of
+the index operator a requirement like the following may be specified:
+    verbinclude(-sn4 //index examples/simple.cc)
+  Here a stand-in argument 0 is used to specify the index operator constraint
+(tt(tp.operator[](0)) could also have been specified), but the argument value
+really is a stand-in. The following code fragment compiles, as tt(string)
+supports the index operator, but the result of executing the fragment is
+undefined:
+        verb(    string str;
+    idx(str, 5);)
+

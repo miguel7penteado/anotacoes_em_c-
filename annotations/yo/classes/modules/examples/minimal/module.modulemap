@@ -1,0 +1,4 @@
+module minimal
+{
+    header "module/module.h"
+}

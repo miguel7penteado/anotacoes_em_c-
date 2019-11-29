@@ -1,0 +1,49 @@
+The file system is a recursive data structure. Its top-level entry is a
+directory (the root directory) containing plain directory entries (files,
+(soft) links, named sockets, etc.) and possibly also (sub)directory
+entries referring to nested directories which in turn may contiain plain-
+and (sub)directory entries.
+
+In the tt(std::filesystem) namespace the elements of directories are objects
+of the class ti(directory_entry), containing names and statuses of the entries
+of that directory. 
+
+The class tt(directory_entry) supports all standard constructors and
+assignment operators and in addition a constructor expecting a tt(path):
+        verb(    directory_entry(path const &entry);)
+
+Objects of the class tt(directory_entry) can be constructed by name, without
+requiring that those objects refer to existing entries in the computer's
+file system. The assignment operator is also available, as is the
+(tt(ostream)) insertion operator, inserting the object's tt(path) into the
+stream. The extraction operator is not available.
+
+`tt(directory_entry)' objects may be compared using the tt(==, !=, <, <=,
+>,) and tt(>=) operators. These operators are then applied to
+their tt(path) objects: tt(directory_entry("one") == directory_entry("one"))
+returns tt(true). 
+        
+In addition to these operators the class tt(directory_entry) also has
+these member functions:
+    itemization(
+    ithtq(assign)(void assign(path const &dest))
+       (the current path is replaced by tt(dest) (its action is identical to
+        that of the overloaded assignment operator);)
+
+    ithtq(replace_filename)(void replace_filename(path const &dest))
+       (the last element of the current object's path is replaced by
+        tt(dest). If that element is empty (like when the object's path ends
+        in a directory separator) then tt(dest) is appended to the current
+        object's path;)
+
+    itht(path)(path const &path() const), hi(operator path const &())
+        tt(operator path const &() const):nl()
+       the current object's path name is returned;
+
+    ithtq(status)(file_system::file_status status([error_code &ec]))
+       (returns type and attributes of the directory entry referred to by the
+        current object. If the current object refers to a symlink, and the
+        symlink's type and status are required, then use ti(symlink_status)
+        (see also section ref(FSSTATUS) below)).
+    )
+

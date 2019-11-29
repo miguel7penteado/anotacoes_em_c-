@@ -1,0 +1,42 @@
+There are two ways to assign a tt(Data) object to another one: copy assignment
+and move assignment. Their implementations are standard:
+        verb(    Data &Data::operator=(Data const &other)    // copy-assignment
+    {
+        Data tmp{ other };
+        swap(tmp);
+        return *this;
+    }
+
+    Data &Data::operator=(Data &&tmp)           // move-assignment
+    {
+        swap(tmp);
+        return *this;
+    })
+
+Since tt(swap) has already been defined the assignment operators need no
+further attention: they are implemented using their standard implementations.
+
+When unrestricted unions are used outside of surrounding classes a
+situation may arise where two unrestricted unions are directly assigned to
+each other. In that case the unions' active fields must somehow be
+available. Since tt(operator=) can only be defined having one parameter,
+simply passing an unrestricted union as its rvalue would lack information
+about the lvalue's and rvalue's active fields. Instead two members are
+suggested: tt(copy), doing copy assignment and tt(move), doing move
+assignment. Their implementations closely resemble those of the standard
+assignment operators:
+        verb(    void Union::copy(Field type, Union const &other, Field next)
+    {
+        Union tmp{ other, next };   // create a copy
+        swap(type, tmp, next);      // swap *this and tmp
+        tmp.destroy(type);          // destroy tmp
+    }
+        
+    void Union::move(Field type, Union &&tmp, Field next)
+    {
+        swap(type, tmp, next);
+    })
+
+In the source distribution you'll find a directory
+tt(yo/memory/examples/unions). It contains a small demo-program in which
+tt(Union) and tt(Data) are used.

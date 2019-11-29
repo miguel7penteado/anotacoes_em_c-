@@ -1,0 +1,67 @@
+The bf(C) programming language offers tools like bf(sleep)(3) and
+bf(select)(2) to suspend program execution for a certain amount of time. And
+of course the family of bf(time)(3) functions for setting and displaying time
+
+tt(Sleep) and tt(select) can be used for waiting, but as they were designed in
+an era when multi threading was unavailable, their usefulness is
+limited when used in multi threaded programs. Multi threading has become part
+of bf(C++) (covered in detail in chapter ref(THREADING)), and additional
+time-related functions are available in the tt(std::filesystem) namespace,
+covered below in this chapter. 
+
+In multi threaded programs threads are frequently suspended, albeit usually
+for a very short time. E.g., when a thread wants to access a variable, but the
+variable is currently being updated by another thread, then the former thread
+should wait until the latter thread has completed the update. Updating a
+variable usually doesn't take much time, but if it takes an unexpectedly long
+time, then the former thread may want to be informed about that, so it can do
+something else while the latter thread is busy updating the
+variable. Interactions between threads like these cannot be realized with
+functions like tt(sleep) and tt(select).
+
+The hi(chrono)tt(std::chrono) namespace bridges the gap between the
+traditionally available time-related functions and the time-related
+requirements of multi-threading and of the tt(std::filesystem) name
+space. All but the specific tt(std::filesystem) related time functionality is
+available after including the tthi(chrono) header file. After including the 
+tthi(filesystem) header file the facilities of the tt(std::filesystem) are
+available. 
+
+Time can be measured in various resolutions: in Olympic games time differences
+of hundreds of seconds may make the distinction between a gold and silver
+medal, but when planning a vacation we might talk about months before we go on
+vacation. Time resolutions are specified through objects of the class
+tt(std::ratio), which (apart from including the tt(<chrono>) header file) is
+also available after including the tt(<ratio>) header file.
+
+Different events usually last for different amounts of time (given a specific
+time resolution). Amounts of time are specified through objects of 
+the class tt(std::chrono::duration).
+
+Events can also be characterized by their points in time: midnight, January 1,
+1970 GMT is a point in time, as is 19:00, December 5, 2010. Points in time are
+specified through objects of the class tt(std::chrono::time_point). 
+
+It's not just that resolutions, durations of events, and points in time of
+events may differ, but the devices (clocks) we use for specifying time also
+differ. In the old days em(hour glasses) were used (and sometimes they're
+still used when boiling eggs), but on the other hand we may use atomic clocks
+when measurements should be very precise. Four different types of clocks are
+available. The commonly used clock is  tt(std::chrono::system_clock), but in
+the context of the file system there's also an (implicitly defined)
+tt(filesystem::__file_clock).
+
+In the upcoming sections the details of the tt(std::chrono) namespace are
+covered. First we look at characteristics of time resolutions. How to
+handle amounts of time given their resolutions is covered next. The next
+section describes facilities for defining and handling time-points. The
+relationships between these types and the various clock-types are covered
+thereafter. 
+
+In this chapter the specification tt(std::chrono::) is often omitted (in
+practice tt(using namespace std) followed by tt(using namespace chrono) is
+commonly used; tt([std::]chrono::) specifications are occasionally used to
+avoid ambiguities). Also, every now and then you'll encounter em(forward
+references) to later chapters, like the reference to the chapter about
+multi-threading. These are hard to avoid, but studying those chapters
+at this point fortunately can be postponed without loss of continuity.

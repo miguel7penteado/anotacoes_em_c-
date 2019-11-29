@@ -1,0 +1,17 @@
+    The final program is constructed in two steps. These steps are given for a
+i(Unix) system, on which ti(flexc++) and the i(GNU) bf(C++) compiler ti(g++)
+have been installed:
+    itemization(
+    it() First, the lexical scanner's source is created using tt(flexc++). For
+this the following command can be given:
+        verb(    flexc++ lexer)
+
+it() Next, all sources are compiled and linked:
+        verb(    g++ -Wall *.cc)
+
+)
+    tt(Flexc++) can be downloaded from
+    hi(https://fbb-git.gitlab.io/flexcpp/)
+    tlurl(https://fbb-git.gitlab.io/flexcpp/), 
+        and requires the ti(bobcat) library, which can be downloaded from
+    tlurl(http://fbb-git.gitlab.io/bobcat/).

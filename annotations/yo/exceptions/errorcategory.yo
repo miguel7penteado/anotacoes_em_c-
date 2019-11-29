@@ -1,0 +1,80 @@
+Objects of the class tt(std::error_category) identify sources of sets of error
+codes. New error categories for new error code enumerations can also be
+defined (cf. section ref(ERRCODEENUM)).
+
+Error categories are designed as em(singletons): only one object of each class
+can exist. Because of this tt(error_categories) are equal when the addresses
+of tt(error_category) objects are equal. Error category objects are returned
+by functions (see below) or by static tt(instance()) members of error category
+classes.
+
+Error category classes define several members. Most are declared em(virtual)
+(cf. chapter ref(POLYMORPHISM)), meaning that those members may be redefined
+in error category classes we ourselves design:
+    itemization(
+    ithtq(default_error_condition)(virtual error_condition
+        default_error_condition(int ev) const noexcept)
+       (returns an tt(error_condition) object (cf. section ref(ERRCOND))
+        initialized with error value tt(ev) and the current 
+        (i.e., tt(*this)) tt(error_category);)
+
+    ittq(virtual bool equivalent(error_code const &code, int condition) const
+        noexcept)
+       (returns tt(true) if the equivalence between 
+        the error condition that is associated with the tt(error_code) object
+        and the tt(error_condition_enum) value that is specified (as an
+        tt(int) value) as the function's second argument could be
+        establisted;)
+
+    ithtq(equivalent)
+       (virtual bool equivalent(int ev, error_condition const &condition)
+        const noexcept)
+       (returns tt(true) if the equivalence of an tt(error_condition) object
+        that is constructed from the tt(ErrorConditionEnum) value that is
+        associated with the tt(ErrorCategoryEnum) value that was passed (as
+        tt(int)) to the function and the tt(error_condition) object that was
+        passed to the function as its second argument could be established;)
+
+    COMMENT(pure virtual:)
+    ithtq(message)(virtual string message(int ev) const)
+       (This member returns a string describing the error condition denoted by
+        tt(ev), which should be a (cast to tt(int)) value of the category's
+        error condition enumeration;)
+
+    COMMENT(pure virtual:)
+    ithtq(name)(virtual char const *name() const noexcept) 
+       (This member returns the name of the error category as NTBS (like
+        tt(generic));) 
+
+    ittq(bool operator<(error_category const &rhs) const noexcept)
+       (returns tt(less<const error_category*>()(this, &rhs)).)
+
+    it() Error category objects can be compared for (in)equality.
+    )
+
+The functions returning predefined error categories are:
+    itemization(
+    ithtq(generic_category)(error_category const &generic_category() noexcept)
+       (returns a reference to the em(generic) tt(error_category) object.
+        The returned object's tt(name) member returns a pointer to the string
+        tt("generic");)
+
+    ithtq(system_category)(error_category const &system_category() noexcept)
+       (returns a reference to the em(operating system) tt(error_category)
+        object: it is used for errors reported by the operating system. The
+        object's tt(name) member returns a pointer to the string
+        tt("system");)
+
+    ithtq(iostream_category)(error_category const &iostream_category() noexcept)
+       (returns a reference to the em(iostream) tt(error_category)
+        object: it is used for errors reported by stream objects. The
+        object's tt(name) member returns a pointer to the string
+        tt("iostream");)
+
+    ithtq(future_category)(error_category const &future_category() noexcept)
+       (returns a reference to the em(future) tt(error_category) object: it is
+        used for errors reported by `future' objects (cf. section
+        ref(FUTURE)). The object's tt(name) member returns a pointer to the
+        string tt("future");)
+    )
+

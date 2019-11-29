@@ -1,0 +1,106 @@
+File system entries (represented by tt(path) objects), have several
+attributes: permissions (e.g., the owner may modifiy an entry, others may
+only read entries), and types (like plain files, directories, and soft-links).
+
+Types and permissions of file system entries are available through objects of
+the class ti(file_status). The class tt(file_status) is a value-class
+supporting copy- and move- constructors and assignment operators.
+
+The constructor 
+        verb(    explicit file_status(file_type type = file_type::none,
+                         perms permissions = perms::unknown))
+
+creates the file status for a specific type of file system entry having a
+specific set of permissions. It also acts as default constructor.
+
+    The constructor's first parameter is an enumeration specifying the type of
+a file system entry represented by a tt(path) object:
+    itemization(
+    itt(not_found = -1) indicates that a file system entry whose status was
+        requested was not found (this is not considered an error);
+    itt(none) indicates either that the file status has not yet been
+        evaluated, or that an error occurred when an entry's status was
+        evaluated;
+    itt(regular):   the entry is a regular file;
+    itt(directory): the entry is a directory;
+    itt(symlink):   the entry is a symbolic link;
+    itt(block):     the entry is a block device;
+    itt(character): the entry is a character device;
+    itt(fifo):      the entry is  a named pipe;
+    itt(socket):    the entry is a socket file;
+    itt(unknown):   the entry is an unknown file type
+    )
+
+    The constructor's second parameter defines the tt(enum class perms)
+specifying the access permissions of file system entries. The enumeration's
+symbols were selected so that their meanings should be more descriptive than
+the constants defined in the tthi(sys/stat.h) header file, but other than that
+they have identical values. All bitwise operators can be used by values
+of the tt(enum class perms). Here is an overview of the symbols defined by the
+tt(enum class perms):
+    centertbl(lrll)(\
+    tline()()\
+    tr(xcell(4)(Permission specifiers))\
+    tr(cell(Symbol)cell(Value)cell(sys/stat.h)tlc()(Meaning))\
+    tline()()\
+    rowfour(none)(0000)()(No permission bits were set)
+    rowfour(owner_read)(0400)(S_IRUSR)(File owner has read permission)
+    rowfour(owner_write)(0200)(S_IWUSR)(File owner has write permission)
+    rowfour(owner_exec)(0100)(S_IXUSR)(File owner has execute/search
+                         permissions)
+    rowfour(owner_all)(0700)(S_IRWXU)(File owner has read, write, and
+                         execute/search permissions)
+    rowfour(group_read)(0040)(S_IRGRP)(The file's group has read permission)
+    rowfour(group_write)(0020)(S_IWGRP)(The file's group has write permission)
+    rowfour(group_exec)(0010)(S_IXGRP)(The file's group has execute/search
+                         permissions)
+    rowfour(group_all)(0070)(S_IRWXG)(The file's group has read, write, and 
+                         execute/search permissions)
+    rowfour(others_read)(0004)(S_IROTH)(Other users have read permission)
+    rowfour(others_write)(0002)(S_IWOTH)(Other users have write permission)
+    rowfour(others_exec)(0001)(S_IXOTH)(Other users have execute/search
+                         permissions)
+    rowfour(others_all)(0007)(S_IRWXO)(Other users have read, write, and
+                         execute/search permissions)
+    rowfour(all)(0777)()(All users have read, write, and execute/search
+                         permissions)
+    rowfour(set_uid)(04000)(S_ISUID)(Set user ID to file owner user ID on
+                         execution)
+    rowfour(set_gid)(02000)(S_ISGID)(Set group ID to file's user group ID on
+                         execution)
+    rowfour(sticky_bit)(01000)(S_ISVTX)(POSIX XSI specifies that when set on a
+                         directory+htmlcommand(<br>)
+                         only file owners may delete files even if
+                         the directory is writeable by 
+                         others+htmlcommand(<br>)
+                         (used, e.g., with tt(/tmp)))
+    rowfour(mask)(07777)()(All valid permission bits.)
+    tline()()\
+    )
+
+The class tt(file_status) provides these members:
+    itemization(
+    itht(permissions)(perms permissions() const) and tt(void permissions(perms
+        newPerms [, perm_options opts] [, error_code &ec])):nl()
+       the former member returns the permissions of the file system entry
+        represented by the tt(file_status) object, the latter can be used to
+        modify those permissions. The hi(perm_options)tt(enum class
+        perm_options) has these values:
+       itemization(
+        itt(replace): current options are replaced by tt(newPerms);
+        itt(add): tt(newPerms) are added to the current permissions;
+        itt(remove): tt(newPerms) are removed from the current permissions;
+        itt(nofollow): when tt(path) refers to a symbolic link the permissions
+            of the symbolic link instead of those of the file system entry the
+            link refers to are updated.
+        )
+
+    itht(type)(file_type type() const) and tt(void type(file_type type)):nl()
+       the former member returns the type  of the file system entry
+        represented by the tt(file_status) object, the latter can be
+        used to set the type.
+    )
+
+
+
+

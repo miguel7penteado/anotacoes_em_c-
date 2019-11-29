@@ -1,0 +1,105 @@
+Concepts themselves are templates. They start with a template header (the
+template headers shown in the examples define a single template type
+parameter, but multiple template parameters may also be used).
+
+According to the standard (outlined in document R0734R0) there are two forms
+of concept definitions: concept variable definitions and concept function
+definitions.
+
+In the previous section we already encountered a concept
+  hi(variable definition (concept)) variable definition:
+    verb(    template <typename Type>
+    concept bool Addable =
+        requires(Type lh, Type rh)
+        {
+            lh + rh;
+        };)
+
+The template header is followed by tt(concept bool), followed by the
+concept's name and the assignment operator. It's called a concept variable
+definition because it resembles how variables are defined (a type, followed by
+the variable's name, followed by an initialization expression). 
+
+With concept variable definitions initialization expressions consists of a
+tt(requires)
+  hi(requires definition) definition which itself looks like a function
+definition: it has a parameter list defining variables of the types specified
+in the template header (which could also be empty), followed by a compound
+statement specifying requirements. 
+
+Don't forget the final semicolon: this is a concept variable definition, and
+like all variable definitions it ends in a semicolon.
+
+Alternatively, concepts may be defined using a concept
+  hi(function definition (concept)) function definition syntax. Concept
+function definitions obey the following syntax:
+        verb(    template <typename Type> 
+    concept bool Fun()
+    {
+        return 
+            requires(...)
+            {
+                ...
+            };
+    })
+
+Currently concepts defined using the function definition syntax can only be
+used in template headers, replacing their tt(typename) keywords. Our
+previously used tt(Addable) concept, which was defined using the concept
+variable syntax could also have been defined using the concept function
+syntax, without affecting the definition of the (also previously used) tt(add)
+function template:
+    verbinsert(-ns4 //function examples/defining.cc)
+
+Different from concepts defined using the function definition syntax concepts
+defined using the concept variable syntax can also be used in explicit
+  hi(requires declaration) em(requires declarations) that may be used when
+declaring and defining classes and functions. Because of this we'll use
+concept variable definitions with all subsequent concept definitions.
+
+Another difference with ordinary templates is that concepts are never
+instantiated. They are only used compile-time to verify that restrictions
+imposed on the template arguments hold. Therefore there's no need to use
+(maybe tt(const)) referernces when defining concept tt(requires)
+specifications. E.g., the concept tt(Addable) specifies
+        verb(    requires(Type lh, Type rh))
+
+Here, tt(lh) and tt(rh) are never actually instantiated, and thus there's
+no need to define, e.g.,
+        verb(    requires(Type const &lh, Type const &rh))
+
+Here are two examples of explicit requires declarations, using the tt(Addable)
+concept in combination with the tt(add) function template. The first example
+uses a requires declaration immediately following the template header, the
+second example places the requires declaration at the end of the function's
+head, just before its (function try) block. When implementations use requires
+declarations their matching declarations must also use these declarations, as
+shown:
+    verbinsert(-ns4 //function examples/requires.cc)
+        
+Concepts define constraints on template parameters of non-concept
+templates. The template parameters of concepts can also be associated with
+constraints. The following three examples illustrate how to define constrained
+concepts. The first example replaces tt(typename) in the concept's template
+header with tt(Addable); the second example defines a concept variable where
+the requires specification immediately follows the template's header. The
+alternative, a requires specification following the concept's name cannot be
+used with concept variable definitions, but em(can) be used with concept
+function definitions, as shown in the third example:
+    verbinsert(-ns4 //extra examples/requires.cc)
+
+Like ordinary template parameters, template parameters in the template headers
+of concept definitions may specify default types. E.g.,
+        verb(    template <Addable Type = int>
+    concept bool Extra =
+        requires(Type lh, Type rh)
+        {
+            lh + rh;
+        };)
+
+The first template parameter of a concept is called its 
+    emi(prototype parameter). The concpt is called a emi(variadic template) if
+its prototype parameter is a template parameter pack. Example:
+        verb(    template <typename ...Types>
+    concept bool Variadic = ... ;)
+

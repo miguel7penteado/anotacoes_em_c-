@@ -1,0 +1,55 @@
+When defining members of class templates outside of their class interfaces the
+members' template headers must match the class templates' template
+headers. This is no different when using concepts.
+
+In the following example the concept tt(Addable) is used when defining the
+class template tt(Data). The class tt(Data) declares a 
+member tt(process), implemented beyond the class interface. Like the class of
+which it is a member its header must also specify tt(Addable) (cf. section
+ref(CONCEPTS)): 
+        verb(    template <Addable Type>
+    class Data
+    {
+        void process();
+    };
+
+    template <Addable Tp>       // The concept must be specified,
+    void Data<Tp>::process()    // but the formal type name 
+    {                           // doesn't have to be `Type'
+        ...
+    })
+
+A comparable situation is encountered if a class template member function
+can only be used when a constraint has been satisfied (but no
+additional constraints apply to other class members). In that case the
+class template can be generically defined (e.g., using tt(typename) in the
+class's template header, although concepts could be specified there as well) 
+and the (additional) constraint can be specified for the relevant member:
+        verb(    template <typename Type>    // generic template type parameter
+    class Data
+    {
+        void process() requires Addable<Type>;  // additional requirement
+    };
+
+    template <typename X>
+    void Data<X>::process() requires Addable<X>
+    ...)
+
+Likewise, member templates may be constrained by concepts. Here too the rule
+applies that the template headers of member implementations must match the
+template headers used in the declarations. As in the previous example the
+formal type names may differ between declarations and implementations:
+        verb(    template <typename Type>
+    class Data
+    {
+        template <Addable Tp>       // constraint applied to
+        void process(Tp par);       // a member template
+    };
+
+    template <typename Type>
+    template <Addable Tp>
+    void Data<Type>::process(Tp par)
+    {
+        ...
+    })
+

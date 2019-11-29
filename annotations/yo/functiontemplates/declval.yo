@@ -1,0 +1,29 @@
+The keyword tt(decltype) is a tool for determining the type of an
+expression. To use them the expression for which tt(decltype) must be
+available. But what if a function template defines a tt(typename Class)
+template parameter and the function template should use the return type of 
+the function tt(Class::fun())? Since two classes may define members tt(fun)
+having different return types, the return type to use is not immediately
+available. 
+
+These kinds of problems are solved by using the function template
+    hi(declval)tt(std::declval), defined in the tthi(utility) header
+file. This function template defines one template type parameter, and returns
+an rvalue reference to an object of the template type parameter's class,
+without actually creating a temporary object. But since an rvalue reference is
+available, its tt(fun) function can be called, and the return type of em(that)
+function can then be produced by tt(decltype). There are no specific
+requirements for the constructors of the class type that's passed to
+tt(declval). Specifically: it doesn't have to have a default or public
+constructor (but access rights em(are) used). Consider this 
+function template:
+        verbinsert(-s4 //1 examples/declval.cc)
+    The function tt(value's) return type is defined as the as yet unknown 
+tt(Type::fun's) return type. 
+
+    By defining two structs, both having tt(fun) member functions tt(value's)
+actual return type can now be returned. This is used in tt(main) where
+respectively an tt(int) and a tt(double) is returned, resulting in the output
+tt(12 12.5):
+        verbinsert(-s4 //2 examples/declval.cc)
+

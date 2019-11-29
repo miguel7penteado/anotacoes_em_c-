@@ -1,0 +1,52 @@
+Constrained function- or class-templates can be declared as usual:
+instead of the implementations semicolons are used. When declaring a function-
+or class-template without constraint specifications then the function or class
+template is unconstrained and won't match existing constrained overloaded
+versions of such function or class templates. On the other hand,
+    hi(concept: declaration) concepts can+em(not) be declared. So if a concept
+definition must be used in multiple source or header files then the concept
+definition normally is provided in a header file of its own which is then
+included by files using the concept.
+
+Here are some simple examples illustrating how constrained 
+function templates are declared:
+    verbinsert(-n //functions examples/declarations.cc)
+
+When declaring class templates their requires-clauses must precede the class
+names. Also, when unconstrained class templates are availble the constrained
+class templates are in fact specializations and must be declared accordingly:
+    verbinsert(-n //classes examples/declarations.cc)
+
+Multiple constraints can also be declared:
+    verbinsert(-n //multi examples/declarations.cc)
+
+Although specializations may define different constraints (e.g., there may
+also be a concept tt(Subtractable)) and a tt(Data) specialization for
+subtractable types could also have been defined:
+        verb(    template <Subtractable Type>
+    struct Data<Type>
+    {};)
+
+this is probably not what you want. E.g, when defining
+tt(Data<vector<int>>{}) where tt(template<typename Type> Data) is only
+declared the compiler complains about an em(incomplete type `struct
+Data<std::vector<int>>') as it cannot use the specialization for either
+tt(Addable) or tt(Subtractable). So it falls back on the generic template, but
+for that one no implementation is available: it's incomplete. 
+
+Defining a template requiring two types, one being tt(Addable) and the other
+template argument might be any type, while a specialization is defined
+requiring a tt(Subtractable) type and an tt(int), then that probably also not
+works as intended. In that case, the templates might be:
+    verbinsert(-n //two examples/multideclare.cc)
+    
+Now, if the first template argument isn't subtractable and the second argument
+em(is) an tt(int): the compiler simply won't use it because the 1st argument
+isn't a subtractable type. So it falls back on the first template. However,
+that one doesn't work either, because the first argument also isn't
+addable. Therefore it complains about tt((lh + rh)) being ill-formed. But as
+you specified tt(int) as the template's second argument you probably expected
+a complaint about tt((lh - rh)) being ill formed. In other words: 
+using concepts still requires you to understand what's going on. Concepts
+helps the compiler to pinpoint reasons for compilation failures, but in the
+end it's you who has to understand what the compiler is trying to tell you.

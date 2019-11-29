@@ -1,0 +1,84 @@
+lsect(Namespaces)(Namespaces)
+includefile(namespaces/intro)
+
+    subsect(Defining namespaces)
+    includefile(namespaces/defining)
+
+        subsubsect(Declaring entities in namespaces)
+        includefile(namespaces/declaring)
+
+        subsubsect(A closed namespace)
+        includefile(namespaces/closed)
+
+    subsect(Referring to entities)
+    includefile(namespaces/referring)
+
+        subsubsect(The `using' directive)
+        includefile(namespaces/directive)
+
+        subsubsect(`Koenig lookup')
+        includefile(namespaces/koenig)
+
+    subsect(The standard namespace)
+    includefile(namespaces/std)
+
+    subsect(Nesting namespaces and namespace aliasing)
+    includefile(namespaces/nesting)
+
+        lsubsubsect(OUTSIDE)(Defining entities outside of their namespaces)
+        includefile(namespaces/outside)
+
+lsect(TIMESPEC)(The std::chrono namespace (handling time))
+includefile(namespaces/chrono/intro)
+
+    subsect(Time resolutions: std::ratio)
+    includefile(namespaces/chrono/ratio)
+
+    lsubsect(DURATION)(Amounts of time: std::chrono::duration)
+    includefile(namespaces/chrono/duration)
+
+    lsubsect(CLOCKS)(Clocks measuring time)
+    includefile(namespaces/chrono/clock)
+
+    lsubsect(TIMEPOINT)(Points in time: std::chrono::time_point)
+    includefile(namespaces/chrono/timepoint)
+
+lsect(STDFS)(The std::filesystem namespace)
+includefile(namespaces/filesystem/intro)
+
+    lsubsect(FILECLOCK)(the '__file_clock' type)
+    includefile(namespaces/filesystem/fileclock)
+
+    lsubsect(ERRORCODE)(The class 'error_code')
+    includefile(namespaces/filesystem/errorcode)
+
+    subsect(Names of file system entries: path)
+    includefile(namespaces/filesystem/path)
+
+        subsubsect(Path modifiers)
+        includefile(namespaces/filesystem/pathmembers)
+        
+        subsubsect(Path operators and free functions)
+        includefile(namespaces/filesystem/pathoperators)
+
+    subsect(Handling directories: directory_entry)
+    includefile(namespaces/filesystem/directoryentry)
+
+        subsubsect(Visiting directory entries: (recursive_)directory_iterator)
+        includefile(namespaces/filesystem/directoryiterator)
+
+    lsubsect(FSSTATUS)(Types (file_type) and permissions (perms) of file
+            system elements: file_status)
+    includefile(namespaces/filesystem/filestatus)
+
+        subsubsect(Obtaining the status of file system entries)
+        includefile(namespaces/filesystem/getstatus)
+        
+    subsect(Information about the space of file systems: space_info)
+    includefile(namespaces/filesystem/spaceinfo)
+
+    subsect(File system exceptions: filesystem_error)
+    includefile(namespaces/filesystem/filesystemerror)
+
+
+

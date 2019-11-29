@@ -1,0 +1,17 @@
+#include "compactor.h"
+
+#include "../xerr.ih"
+
+#include <fstream>
+#include <iostream>
+#include <filesystem>
+
+#include <bobcat/arg>
+#include <bobcat/exception>
+
+#include "../parser/parser.h"
+#include "../files/files.h"
+
+using namespace std;
+using namespace FBB;
+

@@ -1,0 +1,83 @@
+In this section modules are introduced using a simple demo example. More
+extensive coverage of the module-definition language is provided in subsequent
+sections.
+
+To create a module from an existing header file the directory (or its parent
+directory) must contain a file ti(module.modulemap). It contains the
+specifications for creating a module from one or more available header files.
+
+Assume a directory tt(module) contains the following file header file:
+    itemization(
+    itt(module.h):nl()     
+        verbinsert(-a examples/minimal/module/module.h)
+    )nl() 
+    For the benefit of the example it merely declares a simple tt(struct) and
+a function tt(fun) (its content in fact is irrelevant: it could actually be
+completely empty).
+
+To create a module from this header file define the following minimal
+tt(module.modulemap) and tt(main.cc) files:
+    verbinsert(-ans4 examples/minimal/module.modulemap)
+
+tt(main.cc):
+    verbinsert(-as4 examples/minimal/main.cc)
+    
+Here the function tt(main) is defined, because that's a requirement for
+creating a program, but any other source including a header that's mentioned
+in tt(module.modulemap) would also be OK. The above minimal tt(main)
+function's source file does exactly that: it includes tt(module/module.h).
+    
+The file tt(module.modulemap) itself has a simple organization:
+    itemization(
+    it() Line 1 specifies that a module should be constructed, named
+        `minimal';
+    it() Line 3 specifies that the header file tt(module/module.h) defines the
+        module's content.
+    it() The module's content specification follows the module's header 
+        (line 1), and is surrounded by a pair of curly brackets (lines 2 and
+        4).
+    )
+
+To create the module the source file must be compiled using the following
+command: 
+        verb(    clang++-7 -fmodules --std=c++2a -O2 -c main.cc)
+
+All options are required:
+    itemization(
+    itt(-fmodules) is required to inform the compiler that modules should be
+        used;
+    itt(--std=c++2a) is required because modules aren't available before the
+        C2a standard;
+    itt(-O2) (or at least tt(-O1)) is required because using modules implies
+        some form of optimization, and without any optimization request the
+        compiler won't create the module;
+    itt(-c) isn't really required, but suffices to create the module.
+    )
+
+Following this command tt(main.o) and the module are created. By default the
+module is created in a system-defined cache location (but see also section
+ref(MODULEOPTS)). In my system this system-defined cache location is
+tt(/tmp/org.llvm.clang.frank/ModuleCache/), containing
+    itemization(
+    itt(modules.timestamp)
+    it() the module information itself in the subdirectory tt(2TA26R6BHQ19F/).
+        It contains:
+        itemization(
+        itt(minimal-2ORZEBL9H54OZ.pcm) (17,992 bytes)
+        itt(modules.idx) (552 bytes).
+        )
+    )
+
+Once the module is available it will be used if sources including at least one
+of its header files are recompiled. The module is rebuilt if one of its
+headers have changed.
+
+Compare these sizes to the size of the precompiled header tt(module.h.gch)
+(created using tt(clang++ -x c++-header module.h)). On my system the compiled
+header (tt(module.h.gch)) is a file of some 195 KB large.
+
+Note that the file tt(module.h) doesn't contain include guards. As
+modules handle the administration of which header has already been included,
+it's OK if tt(module.h) is included multiple times (e.g., add another 
+tt(#include "module/module.h") line in tt(main.cc)) and recompile: compilation
+succeeds.

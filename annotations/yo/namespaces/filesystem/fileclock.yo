@@ -1,0 +1,42 @@
+In section ref(CLOCKS) it was stated that various predefined clocks are
+available, of which the tt(system_clock) refers to the clock used by the
+computer itself. The tt(filesystem) namespace uses a different clock: the
+tt(std::filesystem::__file_clock). Time points obtained using the
+ti(__file_clock) differ from the time points obtained using the system clock:
+time points using the tt(__file_clock) are based on an epoch that (currently)
+lies well beyond the epoch Jan 1, 00:00:00 1970 that is used by the system
+clock: Fri Dec 31 23:59:59 2173. The two epochs can be positioned on a time
+scale with the present somewhere in between:
+    verb(    <------|-----------------------|-----------------------|------->
+      system_clock's -------->  present <--------    __file_clock's
+       epoch starts  positive            negative     epoch starts
+                      count               count)
+
+The tt(__file_clock) has its own peculiarities: the static member tt(now) is
+available, as are the the non-static members: additions and subtractions of
+durations and the member tt(time_since_epoch) can all be used. The other 
+members (tt(to_time_t, from_time_t, min) and tt(max)) aren't available.
+
+Since tt(to_time_t) is not available for tt(__file_clock) how can we show the
+time or obtain the time's components of a tt(time_point<__file_clock>) object?
+
+Computing the difference between the epochs we find
+6'437'663'999 seconds, which we can add to the obtained time since the
+tt(__file_clock's) epoch to obtain the time since the tt(system_clock's)
+epoch. If tt(timePt) holds the duration since the tt(__file_clock) epoch then
+        verb(    6'437'663'999 + system_clock::to_time_t(
+                        time_point<system_clock>{ nanoseconds(timePt) }))
+
+    equals the number of seconds since the tt(system_clock's) epoch.
+
+The potential drawback of this procedure is that, as tt(__file_clock's)
+name starts with underscores, the begin of its epoch might change. By using
+the tt(now) members of both clocks this drawback is avoided:
+        verb(    auto systemNow = system_clock::now().time_since_epoch();
+    auto fileNow = __file_clock::now().time_since_epoch();
+    time_t diff = (systemNow - fileNow) / 1'000'000'000;
+
+    time_t seconds = diff + system_clock::to_time_t(
+                        time_point<system_clock>{ nanoseconds(timePt) });)
+
+COMMENT( see examples/lastwritetime.cc)

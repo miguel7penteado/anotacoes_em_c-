@@ -1,0 +1,27 @@
+includefile(preamble)
+
+mailto(Frank B. Brokken: MYEMAIL)
+
+report()
+    ()
+    ()
+
+IFDEF(latex)(latexcommand(
+\cleardoublepage
+\pagestyle{headings}
+\pagenumbering{arabic}))()
+
+lsect(UNIONS)(Unrestricted Unions)
+includefile(containers/unrestricted)
+
+    subsect(Implementing the destructor)
+    includefile(containers/uniondestructor)
+
+    subsect(Embedding an unrestricted union in a surrounding class)
+    includefile(containers/embedding)
+
+    subsect(Swapping unrestricted unions)
+    includefile(containers/unionswap)
+
+    subsect(Assignment)
+    includefile(containers/assignment)

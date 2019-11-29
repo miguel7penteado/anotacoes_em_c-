@@ -1,0 +1,29 @@
+Clang offers several options for handling modules. The most important ones
+are:
+    itemization(
+    iti(-fmodules) enables the use of modules;
+
+    iti(-fmodules-cache-path=directory) specifies the location where the
+        modules are stored. When modules are created they are by default
+        stored (cached) in a system-selected default directory, e.g., a
+        location in the tt(/tmp) directory. This might not be what you want
+        (e.g., maybe the tt(/tmp) directory is cleaned at boot-time) in which
+        case a specific directory can be specified.  (e.g.,
+        tt(~/.cache/C++modules) or tt(/usr/local/C++modules-cache));
+
+    iti(-fmodules-prune-interval=seconds) defines the minimum delay in seconds
+        between attempts to prune old, unused module files from the
+        module-cache. The default interval is one week (to turn off pruning
+        use tt(-fmodules-prune-interval=0)). What an `old unused module file'
+        is is defined by the next option;
+
+    iti(-fmodules-prune-after=seconds) defines the minimum interval in seconds
+        before it is removed from the cache by a pruning action if that module
+        has not been used during that interval. The default interval is about
+        a month (31 days);
+
+    iti(-module-file-info module-path) writes information about the module
+        tt(module-path) (which is an absolute or relative path to an existing
+        module). Modules have extension ti(.pcm)hi(module extension: .pcm),
+        and the option writes a local file having the module-path's base name.
+    )

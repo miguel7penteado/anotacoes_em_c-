@@ -1,0 +1,88 @@
+Unrestricted unions should define a non-throwing tt(swap) member. It needs
+three arguments: the current object's field, another union object, and that
+union's field. The prototype of our unrestricted union's tt(swap) member,
+therefore, is:
+        verb(    void swap(Field current, Union &other, Field next);)
+
+To implement it similar considerations as encountered with the copy
+constructor apply. An unrestricted union having em(k) fields must support em(k
+* k) different swap situations. Representing these in a em(k * k) matrix we
+note that the diagonal elements refer to swapping identical elements for which
+no special considerations apply (assuming swapping of identical data types is
+supported). The lower-triangle elements are identical to their transposed
+upper-triangle elements, and so they can use those elements after reverting
+the current and other union objects. All field-specific swap functions can be
+organized in a em(k x k) static matrix of pointers to swapping members. For
+tt(Union) the declaration of that matrix is
+        verb(    static void (Union::*s_swap[][2])(Union &other);)
+
+and its definition is
+        verb(    void (Union::*Union::s_swap[][2])(Union &other) = 
+    {
+      {  &Union::swap2Text,     &Union::swapTextValue},
+      {  &Union::swapValueText, &Union::swap2Value},
+    };)
+
+The diagonal and lower-triangle elements are
+straightforwardly implemented. E.g.,
+        verb(    void Union::swap2Text(Union &other)
+    {
+        u_text.swap(other.u_text);
+    }
+
+    void Union::swapValueText(Union &other)
+    {
+        other.swapTextValue(*this);
+    })
+
+but implementing the upper-triangle elements requires some thought. To
+install a class-type field placement new must again be used. But this time
+we're not copying but moving, as the current object is going to lose its
+content. Like swapping, moving should always succeed. Following the move
+construction the other object has received the current object's data. As the
+current object keeps its valid state after the move, it must also explicitly
+be destroyed to properly end its lifetime. Here is the implementation of
+tt(swapTextValue):
+        verb(    void Union::swapTextValue(Union &other)
+    {
+        int value = other.u_value;  // save the int value
+                                    // install string at other
+        new(&other.u_text) string{ std::move(u_text) }; 
+        u_text.~string();           // remove the old field's union
+    
+        u_value = value;            // store current's new value
+    })
+
+When an unrestricted union has multiple class-type fields then when
+swapping move construction must be applied to both unrestricted unions. This
+requires a temporary. Assume an unrestricted union supports fields of classes
+tt(This) and tt(That) then to swap unrestricted unions using, respectively the
+tt(This) and tt(That) fields we do as follows:
+        verb(    void ThisThat::swapThisThat(ThisThat &other)
+    {
+        This tmp{ std::move(u_this) };  // save the current object
+        u_this.~This();                 // properly destroy it
+
+                                        // install the other object at
+                                        // this object
+        new(&u_this) That{ std::move(other.u_that) };
+        u_that.~That();                 // properly destroy the other 
+                                        // object
+
+                                        // install this object's original 
+                                        // value at the other object
+        new(&other.u_this) This{ std::move(tmp) };
+
+    }                                   // tmp is automatically destroyed)
+
+Now that unrestricted unions can be swapped, their tt(swap) member can be
+used by tt(swap) members of surrounding classes. E.g.,
+        verb(    void Data::swap(Data &other)
+    {
+        d_union.swap(d_field, other.d_union, other.d_field);
+    
+        Union::Field field = d_field;   // swap the fields
+        d_field = other.d_field;
+        other.d_field = field;
+    })
+

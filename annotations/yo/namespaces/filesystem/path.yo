@@ -1,0 +1,47 @@
+Objects of the class tt(filesysten::path)hi(path) hold names of file
+system entries. The class tt(path) is a value class: a default
+constructor (empty path) as well as standard copy/move construction/assignment
+facilities are available. In addition, the following constructors can be used:
+    itemization(
+    itt(path(string &&tmp));
+    itt(path(Type const &source)):nl() 
+       any acceptable type that provides the characters of the path (e.g.,
+        tt(source) is a NTBS);
+    itt(path(InputIter begin, InputIter end)):nl()
+       the characters from tt(begin) to tt(end) define the tt(path's) name.
+    )
+    A thus constructed tt(path) doesn't have to refer to an existing file
+system entry.
+
+    Path constructors expect character sequences (including NTBSs) that may
+consist of various (all optional) elements:
+    itemization(
+    it() a root-name, e.g., a disk-name (like tt(E:)) or device indicator
+        (like tt(//nfs));
+    it() a root-directory, present if it is the first character after
+        the (optional) root-name;
+    it() filename characters (not containing directory separators). In
+        addition the `single dot filename' (tt(.)) represents the current
+        directory and the `double dot filename' (tt(..)) represents the
+        current directory's parent directory;
+    it() directory separators (by default the forward slash). Multiple
+        consecutive separators are automatically merged into one separator.
+    )
+
+    The constructors also define a last tt(format ftmp = auto_format)
+parameter, fir which in practice almost never an argument has to be provided
+(for its details see url(cppreference)
+        (http://en.cppreference.com/w/cpp/experimental/fs/path).)
+
+    Many functions expect tt(path) arguments which can usually be created from
+NTBSs or tt(std::string) objects as tt(path) allows promotions (cf. section
+ref(EXPLICIT)). E.g., the filesystem function tt(absolute) expects a tt(const
+&path) argument. It can be called like this: tt(absolute("tmp/filename")).
+
+
+
+
+
+
+
+

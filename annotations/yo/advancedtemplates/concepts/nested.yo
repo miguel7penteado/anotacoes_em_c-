@@ -1,0 +1,78 @@
+Concepts can be nested. Being able to nest concepts is very useful as it
+allows concepts to be hierarchically ordered. This in turn allows us to define
+concepts in terms of already existing concepts.
+
+In chapter ref(STL) iterators were introduced (section
+ref(ITERATORS)). Commonly five conceptually different iterator types are
+distinguished:
+    itemization(
+    it() Input iterators are incrementable, and they support dereferencing to
+        const values;
+    it() Output iterators are like Input iterators, but they refer to
+        non-const values;
+    it() Forward iterators combine Input and Output iterators;
+    it() Bidirectional iterators are like Forward iterators, but in addition
+        they support decrement operators;
+    it() RandomAccess iterators are like Bidirectional iterators, but these
+        iterators also support addition and subtraction by any stepsize.
+    )
+
+    figure(advancedtemplates/concepts/nested)(Concept Hierarchy)(ConceptFig)
+
+Furthermore all iterators also support (in)equality checks and usually also
+difference operators where the difference between two iterators is equal to
+the number of elements between the iterators. Thus, at the basis of all
+iterators we find the requirement that iterators must be comparable and that
+their difference returns a number. Concepts covering those requirements are
+easily constructed (see also figure ref(ConceptFig)):
+        verbinsert(-ns4 //comparable examples/nested.cc)
+    Note that no type is specified following the tt({ lhs == rhs }) and 
+tt({ lhs != rhs }) requirements, as those types are implied by their
+operators. 
+
+In addition, all iterators support increment operators. Time for yet another
+concept that can be used to enforce that:
+        verbinsert(-ns4 //incrementable examples/nested.cc)
+
+Two more concepts are defined: one for allowing dereferencing pointers
+returning constant references and one returning modifiable references. To
+allow the compiler to verify those requirements we also implicitly require the
+(commonly encountered) existence of typename tt(Type::value_type):
+        verbinsert(-ns4 //dereference examples/nested.cc)
+
+Not much of a hierarchy thus far, but that'll change now that we're about to
+define the concepts for the iterators. An input iterator is an iterator that
+is comparable, subtractable, incrementable and const-dereferenceable. For each
+of these requirements concepts are now available, but only one can be
+specified in the concept's template header. The remaining ones are enforced
+using em(nested requirements): inside the concept's tt(requires) block we
+encounter additional tt(requires) specifications forwarding the concept's
+type to other, already defined, concepts. This way, by specifying, e.g.,
+tt(requires Subtractable<Type>) the concept also enforces that concept's
+requirements. Here is the definition of the concept tt(InIterator), defining
+the requirements of input iterators:
+        verbinsert(-ns4 //initerator examples/nested.cc)
+
+The concept for output iterators is analogously defined. This time requiring
+dereferenceable types rather than const-dereferenceable types:
+        verbinsert(-ns4 //outiterator examples/nested.cc)
+
+For forward iterators the concept tt(FwdIterator) is introduced. A forward
+iterator simply combines the characteristics of input and output
+iterators. Using nested requirements this is easily realized. Our forward
+iterator's template header specifies tt(InIterator) as its required type, then
+uses tt(OutIterator) as its nested requirement:
+        verbinsert(-ns4 //fwditerator examples/nested.cc)
+
+The final two iterator types are defined using concept names in the template
+header, and in addition some simple requirements. E.g., the concept for
+bidirectional iterators specifies types satisfying the requirements of forward
+iterators and adds simple requirements for the decrement operators. Likewise,
+the concept for random access iterators specifies types satisfying the
+requirements of bidirectional iterators and adds simple requirements for
+addition and subtraction of tt(int) values. Here are their concept
+definitions:
+        verbinsert(-ns4 //bidir examples/nested.cc)
+
+
+

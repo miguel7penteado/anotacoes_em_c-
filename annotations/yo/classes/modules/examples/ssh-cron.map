@@ -1,0 +1,53 @@
+module ssh_cron
+{
+    module main {
+        header "main.ih"
+        export *
+    }
+    
+    module cron {
+        header "cron/cron.ih"
+        export *
+    }
+
+    module crondata {
+        header "crondata/crondata.ih"
+        export *
+    }
+
+    module cronentry {
+        header "cronentry/cronentry.ih"
+        export *
+    }
+
+    module daemon {
+        header "daemon/daemon.ih"
+        export *
+    }
+
+    module ipcfunction {
+        header "ipcfunction/ipcfunction.ih"
+        export *
+    }
+
+    module options {
+        header "options/options.ih"
+        export *
+    }
+
+    module parser {
+        header "parser/parser.ih"
+        export *
+    }
+
+    module parserpre {
+        header "parser/parserpre.ih"
+        export *
+    }
+
+    module scanner {
+        header "scanner/scanner.ih"
+        export *
+    }
+
+}

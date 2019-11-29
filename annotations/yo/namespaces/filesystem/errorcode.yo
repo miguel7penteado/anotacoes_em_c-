@@ -1,0 +1,125 @@
+Objects of the class ti(std::error_code) encapsulate em(error values), and
+associated em(error categories) (cf. section ref(SYSTEMERROR)). Traditionally
+error values are available as values assigned to the global hi(errno) tt(int
+errno) variable. By convention, when tt(errno's) value equals zero there's no
+error. This convention was adopted by tt(error_code).
+
+Error codes can be defined for many conceptually different situations. Those
+situations are characterized by their own em(error categories). 
+
+Error categories are used to associate tt(error_code) objects with the errors
+that are defined by those categories. Default available error categories may
+use values like tt(EADDRINUSE) (or the equivalent tt(enum class errc) value
+tt(address_in_use)) but new types of error categories, tailored to other
+contexts, can also be defined.  Defining error categories is covered near the
+end of the annotations() (section ref(ERRCAT)). At this point two
+tt(error_category) members are briefly introduced:
+    itemization(
+    itt(std::string message(int err)) returning a textual description of error
+        tt(err) (like em(address already in use) when tt(err) equals
+        tt(address_in_use)).
+    itt(char const *name()) returning the name of the error category (like
+        em(generic) for the generic category);
+    )
+
+Error category classes are singleton classes: only one object exists of each
+error category. In the context of the filesystem namespace the standard
+category ti(system_category) is used, and a reference to the
+ti(system_category) object is returned by the free function
+tt(std::system_category), expecting no arguments. The public interface of the
+class tt(error_code) declares these construtors and members:
+
+bf(Constructors):
+    itemization(
+    ittq(error_code() noexcept)
+       (the object is initialized with error em(value) 0 and the
+        tt(system_category) error category. Value 0 is not considered an
+        error;)
+
+    it() Copy- and move-constructors are available;
+
+    ittq(error_code(int ec, error_category const &cat) noexcept)
+       (the object is initialized from  error value tt(ec)
+        (e.g., tt(errno), set by a failing function), and a const reference to
+         the applicable error em(category) (provided by, e.g.,
+         hi(system_category) tt(std::system_category()) or
+         hi(generic_category) tt(std::generic_category())). Here is an example
+         defining an tt(error_code) object:
+            verb(    error_code ec{ 5, system_category() };)) 
+
+    ittq(error_code(ErrorCodeEnum value) noexcept)
+       (this is a member template (cf. section ref(MEMTEMP)), using template
+        header tt(template <class ErrorCodeEnum>). It initializes the object
+        with the return value of tt(make_error_code(value)) (see below). In
+        section ref(ERRCODEENUM) defining tt(ErrorCodeEnums) is
+        covered.  Note: tt(ErrorCodeEnum) as such does not exist. It
+        is a mere placeholder for existing tt(ErrorCodeEnum) enumerations; )
+    )
+
+bf(Members):
+    itemization(
+    it() The overloaded assignment operator and an assignment operator
+        accepting an tt(ErrorCodeEnum) are available;
+
+    ittq(void assign(int val, error_category const &cat))
+       (assigns new values to the object's error value and category. E.g,
+        tt(ec.assign(0, generic_category()));)
+
+    ittq(error_category const &category() const noexcept)
+       (returns a reference to the object's error category;)
+
+    ittq(void clear() noexcept)
+       (sets the tt(error_code's) value to 0 and its error category to
+        tt(system_category);)
+
+    ittq(error_condition default_error_condition() const noexcept)
+       (returns the current category's default error condition initialized
+        with the current object's error value and error category (see section
+        ref(ERRCOND) for details about the class tt(error_condition));)
+
+    ittq(string message() const)
+       (the message that is associated with the current object's error value
+        is returned (equivalent to tt(category().message(ec.value())));)
+
+    ittq(explicit operator bool() const noexcept)
+       (returns true if the object's error value is unequal 0 (i.e., it
+        represents and error))
+
+    ittq(int value() const noexcept)
+       (returns the object's error value.)
+    )
+
+bf(Free functions):
+    itemization(
+    it() Two tt(error_code) objects can be compared for (in) equality and can
+        be ordered (using tt(operator<)). 
+
+        Ordering tt(error_codes) associated with different error categories
+        has no meaning. But when the error categories are identical then they
+        are compared by their error code values (cf. this url(SG14 discussion
+        summary)
+      (http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0824r1.html));
+
+    ithtq(make_error_code)(error_code make_error_code(errc value) noexcept)
+       (returns an tt(error_code) object initialized with
+        tt(static_cast<int>(value)) and tt(generic_category())). This function
+        converts an tt(enum class errc) value to an tt(error_code). 
+
+        Other error related enums may also be defined with which tailored
+        tt(make_error_code) functions can be associated (cf. section
+        ref(ERRCODEENUM);)
+
+    ittq(std::ostream &operator<<(std::ostream & os, error_code const &ec))
+       (executes the following statement:
+    verb(return os << ec.category().name() << ':' << ec.value();)
+
+)
+    )
+
+Several functions introduced below define an optional last tt(error_code &ec)
+parameter. Those functions have tt(noexcept) specifications. If those
+functions cannot complete their tasks, then tt(ec) is set to the appropriate
+error code, calling tt(ec.clear()) if no error was encountered. If no tt(ec)
+argument is provided then those functions throw a tt(filesystem_error)
+exception if they cannot complete their tasks.
+

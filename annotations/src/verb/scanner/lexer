@@ -1,0 +1,23 @@
+%filenames scanner
+%class-name "Scanner"
+
+//%interactive
+//%debug
+
+%%
+
+verb                    return Parser::TXT;
+
+"verb("[ \t]*\n |
+"verb(\\"\n             {
+                            d_verb = true;
+                            return Parser::VERB;
+                        }
+
+[[:alnum:]]+            return Parser::TXT;
+
+[ \t\n]+                return Parser::WS; //d_verb ? Parser::WS : Parser::TXT;
+
+[()]                    return d_verb ? matched().front() : Parser::TXT;
+
+.                       return Parser::TXT;

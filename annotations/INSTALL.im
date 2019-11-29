@@ -1,0 +1,27 @@
+    // DOC is the directory in which all standard documentation will be stored
+    // in this directory the non-development related information is stored. It
+    // is not used if not defined (or defined empty)
+#define DOC "/usr/share/doc/cpp-annotations"
+
+    // MAN is the directory in which the manual pages will be stored
+    // They are stored below man7
+#define MAN "/usr/share/man"
+
+
+//==========================================================================
+    // The following /bin/cp option is used to keep, rather than follow
+    // symbolic references. If your installation doesn't support these flags,
+    // then change them into available ones.
+    //   -P, --no-dereference
+    //            never follow symbolic links in SOURCE
+    //   --preserve[=ATTR_LIST]
+    //          preserve   the   specified   attributes   (default:  
+    //          mode,ownership,timestamps), if possible  additional  
+    //          attributes:  context, links, all
+    //   -d     same as --no-dereference --preserve=links
+#define CPOPTS  "-d"
+
+
+
+
+

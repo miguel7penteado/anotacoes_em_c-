@@ -1,0 +1,10 @@
+void readlog()
+{
+    list line;
+
+    while (line = fgets(g_logPath, line))
+        g_log += strtok(line[0], "\n");     // add logfile entries w/o \n
+}
+
+
+

@@ -1,0 +1,26 @@
+The bodies of tt(requires) declarations contain requirement declarations 
+defining constraints on its template parameters. There are four types
+of requirements:
+    itemization(
+    it() Constraints on em(facilities) (e.g., requiring the availability of
+        tt(operator<));
+    it() Constraints on em(types) (e.g., requiring the existence of
+        tt(Type::value_type) where tt(Type) is a concept template type
+        parameter);
+    it() Constraints on relations between variables;
+    it() Constraints on the relationships between different concept template
+        parameters. 
+    )
+    
+Constraints must be compile-time verifiable.
+
+When multiple constraints are specified, em(all) must be satisfied before
+the template argument types are accepted by the compiler. Multiple constraints
+can be combined using the boolean operators tt(and, or) and tt(not) as
+illustrated by the next example where the concept tt(And) requires the
+addition and increment operators. Calling tt(add) with tt(int) arguments
+succeeds, but calling it with tt(map) arguments results in a em(constraints
+not satisfied) error note:
+    verbinsert(-sn4 //and examples/requirements.cc)
+
+Defining and using the four requirement types are covered next.

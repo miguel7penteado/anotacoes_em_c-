@@ -1,0 +1,100 @@
+In the previous section the error code enumerations tt(CatErr) and tt(Cond)
+were developed.  The values of these enumerations specify, respectively, the
+direct and the platform independent causes of errors that may be encountered
+in the context of the new error category developed in this section.
+
+Classes derived from tt(std::error_category) are designed as singleton classes
+and implement their own tt(name, message) and an tt(equivalent) members. Our
+class tt(Category) also declares a static member tt(instance) returning a
+reference to the class's singleton object, which is compile-time initialized
+and is available by the time tt(instance) is called. Alternatively a dedicated
+function (like tt(Category_category)), analogously to the function
+tt(generic_category), returning a reference to the tt(Category) object could
+be defined.
+
+tt(CatErr) values, tt(Cond) values and textual descriptions of tt(CatErr's)
+values are combined in a tt(std::unordered_map) using tt(CatErr) as key, and a
+tt(struct POD) as value type. This map allows us to retrieve the platform
+independent error types and the descriptions that are associated with
+tt(CatErr) values.
+
+Here is the interface of the class tt(Category):
+    verbinsert(-s4 //category examples/errcode/category/category.h)
+
+Its tt(unordered_map s_map) provides the tt(Cond) values and verbal
+descriptions of the tt(CatErr) values given those tt(CatErr) values:
+    verbinsert(-s4 //data examples/errcode/category/data.cc)
+
+The functions tt(make_error_code) and tt(make_error_condition) return,
+respectively, tt(error_code) and tt(error_condition) objects from,
+respectively, tt(CatErr) values and tt(Cond) values.
+
+Their declarations can be provided below the tt(Category) class interface and
+their implementations pass the tt(Category) object to their constructors:
+    verbinsert(-s4 //make examples/errcode/category/makeerrorcode.cc)
+    verbinsert(-s4 //make examples/errcode/category/makeerrorcondition.cc)
+
+The member tt(name) em(must) be defined by classes derived from
+tt(error_category). It simply returns a short string naming the category
+(e.g., tt("Category") for our tt(Category) class). Likewise, the member
+tt(message) em(must) be redefined. Its implementation usually is slightly more
+complex than tt(name's) implementation: it expects a (cast to an tt(int))
+tt(CatErr) value and uses that value to find the corresponding textual
+description in tt(s_map). If found the description is returned; if not found
+then a short fallback message is returned:
+    verbinsert(-s4 //msg examples/errcode/category/message.cc)
+
+The member tt(default_error_condition) receives a (cast to tt(int)) tt(CatErr)
+value. That value is used to find the associated tt(Cond) value. If the
+tt(int) received by the function does not represent a valid tt(CatErr) value
+then the fallback value tt(Cond::NoCond) is used.  The function returns an
+tt(error_condition) object created by tt(make_error_condition) which receives
+the determined tt(Cond) value as its argument:
+    verbinsert(-s4 //def examples/errcode/category/defaulterrorcondition.cc)
+
+What's left is implementing the two tt(equivalent) members. The first
+tt(equivalent) member (receiving a reference to an tt(error_code) object and a
+(cast to tt(int)) tt(Cond) value) determines the equivalence of
+    the tt(Cond) value that is associated with the tt(error_code) object
+and 
+    the tt(Cond) value that is specified as the function's second argument.
+ If these values are equal and the tt(error_code) object's category is equal
+to tt(Category) then the equivalence has been established and tt(true) is
+returned.  Here is its implementation:
+    verbinsert(-s4 //equiv examples/errcode/category/equivalent1.cc)
+
+The second tt(equivalent) member (receiving (as an tt(int)) tt(CatErr) value 
+and an tt(error_condition) object) determines the equivalence of an
+    tt(error_condition) object that is constructed from the tt(Cond) value
+    that is associated with the tt(CatErr) value that was passed (as tt(int))
+    to the function
+and 
+    the tt(error_condition) object that was passed to the function as its
+    second argument.
+
+ Here a prerequisite for concluding equivalence is that the error condition's
+category is tt(Category). If that's the case then the function returns
+tt(true) if its tt(int) argument equals zero and the tt(condition) object also
+indicates no error. Alternatively, if the tt(condition) argument is equal to
+the tt(error_condition) object made from the tt(Cond) value associated with
+the tt(CatErr) value passed to the function as its first argument the
+equivalence has also been established and tt(true) is returned.  Here is its
+implementation:
+    verbinsert(-s4 //equiv examples/errcode/category/equivalent2.cc)
+
+So, in order to define your own category:
+    itemization(
+    it() define an enumeration which is `promoted' to an tt(error_code_enum);
+    it() define an enumeration which is promoted to an
+        tt(error_condition_enum); 
+    it() define a new tt(error_category) class by deriving a class from
+        tt(std::error_category), define it as a singleton class and override
+        its tt(default_error_condition, equivalent, message,) and tt(name)
+        members. 
+    )
+
+
+
+
+
+

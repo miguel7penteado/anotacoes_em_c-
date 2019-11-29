@@ -1,0 +1,159 @@
+#!/usr/bin/icmake -qt/tmp/cppannotations
+
+#define LOGENV "CPPANNOT"       
+
+#include "VERSION"
+#include "INSTALL.im"
+#include "compilers.im"
+
+list    g_log;
+string  
+    g_logPath = getenv(LOGENV)[1],
+    g_logMark,          // unique-marker for g_log entries
+    g_cwd = chdir(".");         // current WD, including trailing /
+
+int g_echo = ON;
+int g_installing;       // set to 1 by install.
+int g_lognr;            // unique-marker number counter for g_log entries
+
+
+#include "icmake/cuteoln"
+#include "icmake/backtick"
+
+#include "icmake/run"
+#include "icmake/mark"
+#include "icmake/md"
+
+#include "icmake/md5sum"
+#include "icmake/log"
+#include "icmake/logzipr"
+#include "icmake/logzip"
+
+#include "icmake/writelog"
+#include "icmake/findall"
+#include "icmake/loglink"
+#include "icmake/loginstall"
+
+#include "icmake/clean"
+#include "icmake/programs"
+#include "icmake/man"
+#include "icmake/docs"
+#include "icmake/latex"
+#include "icmake/pre"
+#include "icmake/install"
+#include "icmake/distclean"
+#include "icmake/zips"
+#include "icmake/examples"
+#include "icmake/verify"
+#include "icmake/gitlab"
+
+#include "icmake/readlog"
+#include "icmake/remove"
+#include "icmake/removedir"
+#include "icmake/uninstall"
+
+void main(int argc, list argv, list envp)
+{
+    string option;
+
+    if (argv[1] == "-q")
+    {
+        g_echo = OFF;
+        argv -= (list)"-q";
+    }
+
+    echo(g_echo);
+
+    option = argv[1];
+
+    if (option == "clean")
+        clean(1);
+
+    if (option == "examples")
+        examples();
+
+    if (option == "programs")
+    {
+        programs(0);
+        programs(1);
+        exit(0);
+    }
+
+    if (option == "distclean")
+        distclean();
+
+    if (option == "pre")
+        pre();
+
+    if (option == "docs")
+        docs();
+
+    if (option == "html")
+        runhtml();
+
+    if (option == "latex")
+        latex();
+
+    if (option == "ps")
+        runps();
+
+    if (option == "txt")
+        runtxt();
+
+    if (option == "verify")
+        verify();
+
+    if (option == "zips")
+        zips();
+
+    if (option == "man")
+    {
+        man();
+        exit(0);
+    }
+
+    if (option == "gitlab")
+        gitlab();
+
+    if (option == "uninstall")
+        uninstall();
+
+    if (option == "install")
+        install(argv[2]);
+
+
+    printf("Usage: build [-q] what\n"
+        "Where\n"
+        "   [-q]:   run quietly, do not show executed commands\n"
+        "`what' is one of:\n"
+        "   clean           - clean up remnants of previous compilations\n"
+        "   distclean       - clean remnants of locally run ./bin/ scripts\n"
+        "\n"
+        "   docs            - construct the C++ Annotations\n"
+        "                     Run 'build programs' and 'build pre' at least\n"
+        "                     once before 'build docs'\n"
+        "\n"
+        "   examples        - compile all examples\n"
+        "   install [base]  - install the C++ Annotations in the locations\n"
+        "                     defined in the INSTALL.im file, optionally\n"
+        "                     below 'base'\n"
+        "   html            - force the html construction\n"
+        "   latex           - force the latex construction, (cf 'verify')\n"
+        "   man             - build the manual page (requires Yodl)\n"
+        "   pre             - prepare files for independent `docs' call\n"
+        "   ps              - create .ps/.pdf files afer 'build latex'\n"
+        "   programs        - build support programs\n"
+        "   txt             - force the txt construction\n"
+        "   verify          - run after `build docs' to find overfull boxes\n"
+        "                     or undefined references in\n"
+        "                     tmp/docs/latex/cplusplus.log\n"
+        "   zips            - zip archives (after doc)\n"
+        "   uninstall       - remove installed files and empty directories\n"
+        "   gitlab          - prepare gitlab's gh-pages update\n"
+        "                     (internal use only)\n"
+        "\n"
+    );
+    exit(1);
+}
+
+

@@ -1,0 +1,114 @@
+https://wg21.link/
+Local copies in documents/C++/2a
+
+    LOW: Attributes [[likely]] and [[unlikely]]                  P0479R5             9
+Make typename more optional                             P0634R3             9
+Destroying operator delete                              P0722R3             9   
+char8_t                                                 P0482R6             9
+
+        Allow lambda-capture [=, this]                          P0409R2             8   
+NOT:    __VA_OPT__                                              P0306R4,P1042R1     8 (partial)
+        Designated initializers                                 P0329R4             4.7 (partial)
+        template-parameter-list for generic lambdas             P0428R2             8 
+        Default member initializers for bit-fields              P0683R1             8           
+Initializer list constructors in class                                      
+    template argument deduction                         P0702R1             8 
+    const&-qualified pointers to members                    P0704R1             8   
+Concepts                                                P0734R0             6(TS only)
+? Lambdas in unevaluated contexts                         P0315R4             9
+Three-way comparison operator                           P0515R3             -   
+Simplifying implicit lambda capture                     P0588R1             8
+    init-statements for range-based for                     P0614R1             9   
+Default constructible and assignable                    P0624R2             9   
+    stateless lambdas                                                       
++ const mismatch with defaulted copy                      P0641R2             9
+    constructor                                                             
+Access checking on specializations                      P0692R1             Yes     
+ADL and function templates that are not visible         P0846R0             9   
+Less eager instantiation of constexpr functions         P0859R0             9
+Pack expansion in lambda init-capture                   P0780R2             9   
+Attribute [[no_unique_address]]                         P0840R2             9   
+DR: Relaxing the structured bindings                    P0961R1             8
+    customization point finding rules                                       
+DR: Relaxing the range-for loop customization           P0962R1             8
+    point finding rules                                                     
+DR: Allow structured bindings to accessible             P0969R0             8   
+    members                                                                 
+Contracts                                               P0542R5             -
+Class types in non-type template parameters             P0732R2             9
+Deprecate implicit capture of this via [=]              P0806R2             9
+explicit(bool)                                          P0892R2             9
+Integrating feature-test macros                         P0941R2             5
+Prohibit aggregates with user-declared constructors     P1008R1             9   
+constexpr virtual function                              P1064R0             9   
+Consistency improvements for comparisons                P1120R0             -
+std::is_constant_evaluated()                            P0595R2             9
+constexpr try-catch blocks                              P1002R1             9   
+Immediate functions                                     P1073R3             -
+Nested inline namespaces                                P1094R2             9
+Yet another approach for constrained declarations       P1141R2             -
+constexpr dynamic_cast and polymorphic typeid           P1327R1             -
+Changing the active member of a union inside constexpr  P1330R0             9   
+Coroutines                                              P0912R5             -   8 (partial)
+Parenthesized initialization of aggregates              P0960R3             -
+DR: Array size deduction in new-expressions             P1009R2             -
+Modules                                                 P1103R3             -   8 (partial)
+Stronger Unicode requirements                           P1041R4,P1139R2         -   Yes
+<=> != ==                                               P1185R2             -
+Explicitly defaulted functions with different           P1286R2             -
+    exception specifications    
+Lambda capture and storage class specifiers of          P1091R3,P1381R1     10  
+    structured bindings     
+
+--------------------------------------------------------------------------------------------
+
+std::endian     P0463R1     8   7   
+Synchronized buffered ostream   P0053R7                             
+String prefix and suffix checking   P0457R2     9   6   
+[[nodiscard]] in the standard library   P0600R1     9   7 (partial)
+Integral power-of-2 operations  P0556R3     9                       
+Consistent container erasure    P1209R0     9   8                   
+std::lerp() and std::midpoint()     P0811R3     9   9                   
+
+std::remove_cvref   P0550R2     9   6
+Extending std::make_shared() to support arrays  P0674R1                             
+Floating point atomic   P0020R6     
+constexpr for <algorithm> and <utility>     P0202R3         8                   
+More constexpr for <complex>    P0415R1     9   
+Make std::memory_order a scoped enumeration     P0439R0     9   9                   
+Library support for operator<=> <compare>   P0515R3     -   7   
+Utility to convert a pointer to a raw pointer   P0653R2     8   6 
+Atomic std::shared_ptr and std::weak_ptr    P0718R2                             
+std::span   P0122R7         7                   
+Calendar and timezone   P0355R7         7 (partial)                     
+<version>   P0754R2     9   7   
+Comparing unordered containers  P0809R0     from here: not yet support, not downloaded
+ConstexprIterator requirements  P0858R0                         
+std::basic_string::reserve() should not shrink  P0966R1         8                   
+std::atomic_ref     P0019R8                             
+contains() member function of associative containers    P0458R2     9       
+DR: Guaranteed copy elision for piecewise construction  P0475R1     9                       
+std::bit_cast()     P0476R2                             
+Improving the return value of erase-like algorithms     P0646R1     9
+std::is_nothrow_convertible     P0758R1     9   9                   
+Add shift to <algorithm>    P0769R2 
+std::type_identity  P0887R1     9   8
+Concepts library    P0898R3                             
+constexpr comparison operators for std::array   P1023R0         8                   
+std::unwrap_ref_decay and std::unwrap_reference     P0318R1     9   8
+std::bind_front()   P0356R5     9                       
+std::reference_wrapper for incomplete types     P0357R3     9   8                   
+Fixing operator>>(basic_istream&, CharT*)   P0487R1         8
+Utility functions to implement uses-allocator construction  P0591R4     9                       
+DR: std::variant and std::optional should propagate copy/move triviality    P0602R4     8.3 
+A sane std::variant converting constructor  P0608R3     10  9                   
+The One Ranges Proposal     P0896R4                             
+<chrono> zero(), min(), and max() should be noexcept    P0972R0     9   8
+constexpr in std::pointer_traits    P1006R1     9   8                   
+std::assume_aligned()   P1007R3     9                       
+Remove comparison operators of std::span    P1085R2         8                   
+Make stateful allocator propagation more consistent for operator+(basic_string)     P1165R1  10
+Usability enhancements for std::span    P1024R3         9                   
+DR: Make create_directory() Intuitive   P1164R1     8.3
+std::ssize() and unsigned extent for std::span  P1227R2         9                   
+Traits for (un)bounded arrays   P1357R0     9   9                   

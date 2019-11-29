@@ -1,0 +1,112 @@
+COMMENT(https://en.wikipedia.org/wiki/Software_transactional_memory)
+
+Transactional memory is used to simplify shared data access in multithreaded
+programs. The benefits of transactional memory is best illustrated by a
+small program. Consider a situation where threads need to write information to
+a file. A plain example of such a program would be:
+        verb(    void fun(int value)
+    {
+        for (size_t rept = 0; rept != 10; ++rept)
+        {
+            this_thread::sleep_for(chrono::seconds(1));
+            cout << "fun " << value << '\n';
+        }
+    };
+    
+    int main()
+    {
+        thread thr{ fun, 1 };
+        fun(2);
+        thr.join();
+    })
+
+When this program is run the tt(fun 1) and tt(fun 2) messages are
+intermixed. To prevent this we traditionally define a tt(mutex), lock it,
+write the message, and release the lock:
+        verb(    void fun(int value)
+    {
+        static mutex guard;
+
+        for (size_t rept = 0; rept != 10; ++rept)
+        {
+            this_thread::sleep_for(chrono::seconds(1));
+            guard.lock();
+            cout << "fun " << value << '\n';
+            guard.unlock();
+        }
+    };)
+
+Transactional memory handles the locking for us. Transactional memory is used
+when statements are embedded in a ti(synchronized) block. The function
+tt(fun), using transactional memory, looks like this:
+        verb(    void fun(int value)
+    {
+        for (size_t rept = 0; rept != 10; ++rept)
+        {
+            this_thread::sleep_for(chrono::seconds(1));
+            synchronized
+            {
+                cout << "fun " << value << '\n';
+            }
+        }
+    };)
+
+hi(transactional memory: -fgnu-tm)
+    To compile source files using transactional memory the tt(g++) compiler
+option ti(-fgnu-tm) must be specified.
+
+    The code inside a synchronized block is executed as a single, as if the
+block was protected by a mutex. Different from using mutexes transactional
+memory is implemented in software instead of using hardware-facilities.
+
+    Considering how easy it is to use transactional memory compared to using
+the tt(mutex)-based locking mechanism using transactional memory appears
+too good to be true. And in a sense it is. When encountering a synchronized
+block the thread unconditionally executes the block's statements. At the same
+time it keeps a detailed log of all its actions. Once the statements have been
+completed the thread checks whether another thread didn't start executing the
+block just before it. If so, it reverses its actions, using the synchronized
+block's log. The implication of this should be clear: there's at least the
+overhead of maintaining the log, and em(if) another thread started executing 
+the synchronized block before the current thread then there's the additional
+overhead of reverting its actions and to try again. 
+
+    The advantages of transactional memory should also be clear: the
+programmers no longer is responsible for correctly controlling access to
+shared memory; risks of encountering deadlocks have disappeared as has all
+adminstrative overhead of defining mutexes, locking and unlocking. Especially
+for inherently slow operations like writing to files transactional memory can
+greatly simplify parts of your code. Consider a tt(std::stack). Its
+top-element can be inspected but its tt(pop) member does not return the
+topmost element. To retrieve the top element and then maybe remove it
+traditionally requires a mutex lock surrounding determining the stack's size,
+and if empty, release the lock and wait. If not empty then retrieve its
+topmost element, followed by removing it from the stack. Using a transactional
+memory we get something as simple as:
+            verb(    bool retrieve(stack<Item> &itemStack, Item &item)
+    {
+        synchronized
+        {
+            if (itemStack.empty())
+                return false;
+            item = std::move(itemStack.top());
+            itemStack.pop();
+            return true;
+        }
+    })
+
+Variants of tt(synchronized) are:
+    itemization(
+    iti(atomic_noexcept): the statements inside its compound statement may not
+        throw exceptions. If they do, tt(std::abort) is called. If the earlier
+        tt(fun) function specifies tt(atomic_noexcept) instead of
+        tt(synchronized) the compiler generates and error about the use of the
+        insertion operator, from which an exception may be thrown.
+    iti(atomic_cancel): not yet supported by tt(g++) (version 8.2.0). If an
+        exception other than (tt(std::)) tt(bad_alloc, bad_array_new_length,
+        bad_cast, bad_typeid, bad_exception, exception, tx_exception<Type>) is
+        thrown tt(std::abort) is called. If an acceptable exception is thrown,
+        then the statements executed so far are undone.
+    iti(atomic_commit): if an exception is thrown from its compound statement
+        all thus far executed statements are kept (i.e., not undone).
+    )

@@ -1,0 +1,248 @@
+A i(lambda expression) defines an
+    i(anonymous function object)hi(function object: anonymous), also called a
+    emi(closure object) or simply a em(closure). 
+
+    When a lambda expression is evaluated it results in a temporary function
+object (the closure object). This temporary function object is of a unique
+anonymous class type, called its emi(closure type).
+
+Lambda expressions are used inside blocks, classes or namespaces (i.e., pretty
+much anywhere you like). Their implied closure type is defined in the smallest
+block, class or namespace scope containing the lambda expression. The closure
+object's visibility starts at its point of definition and ends where its
+closure type ends (i.e., their visibility is identical to the visibility of
+plain variables).
+
+The closure type defines a tt(const) public inline function call
+operator. Here is an example of a lambda expression:
+    hi(lambda-introducer)
+    hi(lambda-declarator)
+        verb(    []                      // the `lambda-introducer'
+    (int x, int y)          // the `lambda-declarator'
+    {                       // a normal compound-statement
+        return x * y;
+    })
+
+The function (formally: the function call operator of the closure type
+created by this lambda expression) expects two tt(int) arguments and returns
+their product. This function is an inline tt(const) member of its closure
+type. Its tt(const) attribute is removed if the lambda expression specifies
+hi(lambda: mutable) tt(mutable). E.g.,
+        verb(    [](int x, int y) mutable
+    ...)
+
+The lambda-declarator may be omitted if no parameters are defined, but
+when specifying tt(mutable) (or tt(constexpr), see below) a lambda-declarator
+must be specified (at least as an empty set of parentheses). The parameters in
+a lambda declarator cannot be given default arguments.
+
+Declarator specifiers can be tt(mutable), tt(constexpr), or both. A
+tt(constexpr) lambda-expression is itself a tt(constexpr), which may be
+compile-time evaluated if its arguments qualify as const-expressions. By
+implication, if a lambda-expression is defined inside a tt(constexpr) function
+then the lambda-expression itself is a tt(constexpr), and the tt(constexpr)
+declarator specifier is not required. Thus, the following function definitions
+are identical:
+        verb(    int constexpr change10(int n)
+    {
+        return [n] 
+               { 
+                   return n > 10 ? n - 10 : n + 10; 
+               }();
+    }
+    
+    int constexpr change10(int n)
+    {
+        return [n] () constexpr 
+               { 
+                   return n > 10 ? n - 10 : n + 10; 
+               }();
+    })
+
+A closure object as defined by the previous lambda expression could for
+example be used in combination with the tt(accumulate) generic algorithm
+(cf. section ref(ACCU)) to compute the product of a series of tt(int) values
+stored in a vector:
+        verb(    cout << accumulate(vi.begin(), vi.end(), 1,
+                [] (int x, int y) 
+                { 
+                    return x * y; 
+                }
+            );)
+
+This lambda expression implicitly defines its return
+        hi(return type: implicit)
+    type as tt(decltype(x * y)). Implicit return types can be used in these
+cases:
+    itemization(
+    it() the lambda expression does not contain a tt(return) statement (i.e.,
+        it's a void lambda expression);
+    it() the lambda expression contains a single tt(return) statement; or
+    it() the lambda expression contains multiple tt(return) statements
+        returning values of identical types (e.g., all tt(int) values).
+    )
+
+    If there are multiple tt(return) statements returning values of different
+types then the lambda expression's return type must explicitly be specified
+using a
+        hi(return type: late-specified)i(late-specified return type),
+(cf. section ref(AUTO)):
+        verb(    [](bool neg, double y) -> int
+    {
+        return neg ? -y : y;
+    })
+
+hi(lambda: access variables)Variables visible at the location of a lambda
+expression may be accessible from inside the lambda expression's compound
+statement. Which variables and how they are accessed depends on the content
+of the lambda-introducer. 
+
+When the lambda expression is defined inside a class member function the
+lambda-introducer may contain tt(this) or tt(*this); where used in the
+following overview this class-context is assumed.
+
+Global variables are always accessible, and can be modified if their
+definitions allow so (this in general holds true in the following overview:
+when stated that `variables can be modified' then that only applies to
+variables that themselves allow modifications). 
+
+Local variables of the lambda expression's surrounding function 
+may also be specified inside the lambda-introducer. The specification
+tt(local) is used to refer to any comma-separated list of local variables
+of the surrounding function that are visible at the lambda expression's
+point of definition. There is no required ordering of the 
+tt(this, *this) and tt(local) specifications.
+
+Finally, where in the following overview tt(mutable) is mentioned it must be
+specified, where tt(mutable_opt) is specified it is optional.
+
+    Access globals, maybe data members and local variables:
+    itemization(
+    itt([] mutable_opt) limits access to merely global variables;
+
+    itt([this] mutable_opt) allows access to all the object's data members,
+        which can be modified.
+
+    itt([*this]) provides access to all the object's members, which cannot be
+        modified.
+
+    itt([*this] mutable) is like tt([*this]) but modifiable copies are used
+        inside the lambda expression without affecting the object's own data.
+
+    itt([local] [this, local] [*this, local]): like the previous
+        tt([...])  specifications, but tt(local) is immutably accessed.
+
+    itt([local] mutable, [this, local] mutable, [*this, local] mutable): like
+        the previous tt([...])  specifications, but tt(local) is available as
+        a local copy, which can be modified without affecting the surrounding
+        function's local variable.
+
+    itt([&local] mutable_opt, [this, &local] mutable_opt, [*this, &local]
+        mutable_opt): like the previous tt([...])  specifications, but
+        tt(local) is available by modifiable reference of the surrounding
+        function's local variable.
+    )
+    
+    The following specifications must use tt(=) as the first element of the
+    lambda-introducer. It allows accessing local variables by value,
+    unless...:
+    itemization(
+    itt([=], [=, this], [=, *this]): the `local const' specifier: local
+        variables are visible, but cannot be modified. 
+
+    itt([=] mutable), tt([=, this] mutable, [=, *this] mutable):
+        local variables are visible as modifiable copies. The original local
+        variables themselves are not affected. 
+
+    itt([=, &local] mutable_opt): like the previous tt([= ...])
+        specifications, but tt(local) is accessed by modifiable
+        reference.
+    )
+
+    The following specifications must use tt(&) as the first element of the
+    lambda-introducer. It allows accessing local variables by reference,
+    unless...:
+    itemization(
+    itt([&] mutable_opt), tt([&, this], mutable_opt): the `local reference
+        specifier: local variables are visible as modifiable
+        references. When the lambda expression is defined inside a class
+        member function the object's members are accessible and modifiable.
+
+    itt([&, *this] mutable_opt): 
+        local variables are visible as modifiable references, data members are
+        visible but cannot be modified.
+
+    itt([&, local] mutable_opt), tt([&, this, local] mutable_opt), tt([&,
+        *this, local] mutable_opt): like the previous tt([& ...])
+        specifications, but tt(local) is accessed as a modifiable copy, not 
+        affecting the surrounding function's local variable.
+    )
+
+Even when not specified, lambda expressions implicitly capture 
+    hi(lambda: capture =, this) their tt(this)
+pointers, and class members are always accessed relative to tt(this). But when
+members are called asynchronously (cf. chapter ref(THREADING)) a problem may
+arise, because the asynchronously called lambda function may refer to members
+of an object whose lifetime ended shortly after asynchronously calling the
+lambda function. This potential problem is solved by using `tt(*this)' in the
+lambda-capture if it starts with tt(=), e.g., tt([=, *this]) (in addition,
+variables may still also be captured, as usual). When specifying `tt(*this)'
+the object to which tt(this) refers is em(explicitly captured): if the
+object's scope ends it is not immediately destroyed, but its lifetime is
+extended by the lambda-expression for the duration of that expression. In
+order to use the `tt(*this)' specification, the object must be
+available. Consider the following example:
+        verb(    struct S2 
+    {
+        double ohseven = .007;
+
+        auto f() 
+        {
+            return [this]                       // (1, see below)
+                   {
+                        return [*this]          // (2)
+                               {
+                                    return ohseven; // OK
+                               };
+                   }();                         // (3)
+        }
+
+        auto g() 
+        {
+            return [] 
+                   {
+                        return [*this] 
+                        { 
+                            // error: *this not captured by 
+                            // the outer lambda-expression 
+                        }; 
+                    }();
+        }
+    };)
+
+Although lambda expressions are anonymous function objects, they em(can) be
+assigned to variables. Often, the variable is defined using the keyword
+tt(auto). E.g.,
+        verb(    auto sqr = [](int x)
+               {
+                   return x * x;
+               };)
+
+The lifetime of such lambda expressions is equal to the lifetime of the
+variable receiving the lambda expression as its value. 
+
+Note also that defining a lambda expression is different from calling its
+function operator. The function tt(S2::f()) returns what the lamba expression
+(1)'s function call operator returns: its function call operator is called by
+using tt(()) (at (3)). What it in fact returns is another anonymous function
+object (defined at tt((2))). As that's just a function object, to retrieve its
+value it must still be called from tt(f's) return value using something like
+this:
+        verb(    S2 s2;
+    s2.f()();)
+
+Here, the second set of parentheses activates the returned function
+object's function call operator. Had the parentheses been omitted at (3) then
+tt(S2::f()) would have returned a mere anonymous function object (defined at
+(1)), in which case it would require three sets of parentheses to retrieve
+tt(ohseven's) value: tt(s2.f()()()).

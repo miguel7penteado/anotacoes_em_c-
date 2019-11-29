@@ -1,0 +1,46 @@
+em(Compound requirements) define constraints on the resulting types of
+operations that must be supported by variables of the concept's parameter
+types. Example:
+        verb(    template <typename Type> 
+    concept bool ReturnTypes =
+            requires(Type par)
+            {
+                { ++par } -> Type &;    // ++par returns a Type &
+                { par[0] } -> char;     // par[..] returns a char
+            };)
+
+Note again the use of the 0 argument of the index operator. In cases where
+arguments are required stand-in argument values can be used. Before the
+tt(->) token tt(noexcept) may be specified (cf. chapter ref(EXCEPTIONS)) to
+indicate that the compund expression will not throw exceptions.
+
+When operations for multiple operands must be specified additional tt(Type)
+parameters can be defined:
+        verb(    template <typename Type> 
+    concept bool MultiArgs =
+        requires(Type lhs, Type rhs)
+        {
+            { lhs + rhs   } -> Type;  
+            { lhs += rhs  } -> Type &;
+            { lhs.c_str() } -> char const *;
+        };)
+
+Instead of mixing requirements for multiple and single tt(Type) parameters it
+may be cleaner to define separate requirements for multiple and single
+parameters. E.g.,
+
+        verb(    template <typename Type> 
+    concept bool CombiOps = 
+        requires(Type lhs, Type rhs)
+        {
+            { lhs + rhs   } -> Type;  
+            { lhs += rhs  } -> Type &;
+        }
+        and
+        requires(Type lhs)
+        {
+            { lhs.c_str() } -> char const *;
+        };)
+
+Also, the late return type specifications (like tt(-> Type)) can be omitted if
+implied. In addition, specifying conversions is OK.

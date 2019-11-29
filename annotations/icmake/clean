@@ -1,0 +1,27 @@
+string remove1;
+string remove2;
+
+void setRemovals()
+{
+    remove1 = "tmp ../sf/index.html ../sf/cppannotations";
+    remove2 = "o indexentry/o aux/o";
+}
+
+void clean(int stop)
+{
+    setRemovals();
+
+    run("rm -rf " + remove1);
+
+    chdir("src/htmlindex");
+    run("rm -rf " + remove2);
+
+    if (stop)
+        exit(0);
+    else
+        chdir("../../");
+}
+
+
+
+

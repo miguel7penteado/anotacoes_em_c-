@@ -1,0 +1,56 @@
+This section is modified when the first or second part of the version number
+changes (and occasionally also for the third field of the version number). At
+a major version upgrade the entries of the previous major version are kept,
+and entries referring to older releases are removed.
+    itemization(
+    it() Version 11.2.0 moves the (rewritten) coverage of the chrono and
+        filesystem namespaces to the Namespaces chapter, and contains a
+        rewrite of the sections covering tt(error_codes, error_categories,)
+        and tt(error_conditions) (cf. sections ref(ERRORCODE),
+        ref(SYSTEMERROR), and ref(ERRCODEENUM)).
+
+    it() Version 11.1.0 contains an almost completely rewrite of the sections
+        covering concepts (section ref(CONCEPTS)).
+
+    it() Version 11.0.0 covers new elements and elements that were
+        re-introduced at the C2a standard. Version 11.0.0 is made available at
+        the time the C2a standard has not yet formally been released, and
+        compilers do not yet implement all its new elements. Therefore,
+        modifications and updates may be required once the C2a standard has
+        officially become the next standard. However, the elements of the new
+        standard that are now covered by the annotations() are (mostly)
+        supported by compilers. 
+            itemization(
+            it() Modules (cf. section ref(MODULES)) simplify header
+                processing. E.g., when using modules header include guards are
+                not required anymore.
+
+            it() The section about unrestricted unions (ref(UNIONS)) received
+                a major upgrade, and was moved to chapter ref(MEMORY).
+
+            it() The section about the syntax of lambda expressions (section
+                ref(LAMBDA)) received a major upgrade.
+
+            it() Section ref(STDFS) covering the tt(std::filesystem) namespace
+                received a new subsection showing which facilities of the
+                tt(std::filesystem) namespace are replacing traditional bf(C)
+                functions.
+
+            it() Transactional memory (covered in section ref(TRANSMEM))
+                simplify access to shared data in multithreaded programs.
+
+            it() Section ref(FOLDEXP) covers em(folding expressions) can be
+                used to associate binary operators with a variadic number of
+                arguments.
+
+            it() Section ref(TUPLES) received a sub-section covering
+                specializing tt(std::tuple) elements in combination with
+                structured binding declarations.
+
+            it() Section ref(CONCEPTS) covers concepts (re-introduced into the
+                language after having been considered before), allowing template
+                writers to define requirements for their templates that must
+                be satisfied before their templates can be used.
+            )
+    )
+

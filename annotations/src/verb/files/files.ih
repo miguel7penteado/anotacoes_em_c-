@@ -1,0 +1,13 @@
+#include "files.h"
+
+#include "../xerr.ih"
+
+#include <fstream>
+
+#include <bobcat/arg>
+#include <bobcat/string>
+#include <bobcat/exception>
+
+using namespace std;
+using namespace FBB;
+

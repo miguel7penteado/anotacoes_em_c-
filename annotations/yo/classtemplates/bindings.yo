@@ -1,0 +1,135 @@
+Structured bindings were introduced in section ref(STRUCTBIND). That
+section concentrated on associating structured binding declarations with
+data members of structs, returned as POD values. 
+
+Structured bindings, however, can also be used in a much more generic way, by
+associating them with tuples. By doing so structured bindings don't have to be
+associated with data members, but they may hold values returned by class
+members.
+
+The association between structured binding declarations and tuples is very
+strong. In fact it is so strong that the standard explicitly allows users to
+define tuple specializations, even though tuple specializations live in the
+standard namespace, which otherwise is off-limits to programmers (except, of
+course, when using its features).
+
+In order to allow structured bindings to be associated with class members
+the following steps must be performed:
+
+    itemization(
+    it() The class must be provided with overloaded tt(get) member templates,
+        using tt(int) (or another integral type) specializations, where each
+        specialization returns a class element (e.g., a member function).
+
+        The availability of tt(if constexpr) clauses makes it easy to combine
+        all these specializations into a single member template.
+
+        Alternatively, a function template defined outside of the class can be
+        defined, which allows associating structured bindings with class
+        members even if you're not the class's author. In this case the
+        function defines a tt(ClassType [cv] &object) parameter.
+
+    it() A specialization of tt(std::tuple_size<Type>) is provided, defining
+        tt(static size_t const value) as the number of index values that can
+        be specified with the tt(get<idx>) function. Although defining
+        entities in the standard namespace is normally
+       hi(std namespace: additions OK) em(off limits) to ordinary programs, in
+        this special case such specializations are allowed by the b(C++)
+        standard.
+
+    it() A specialization of tt(std::tuple_element<idx, Type>) is provided,
+        defining tt(type) as the type matching the return type of
+        tt(get<idx>). 
+    )
+
+The flexibility that is achieved by being able to use structured bindings this
+way is enormous. As long as a class offers members returning values those
+members can be associated with structured binding variables. The member
+functions don't even have to return values that are immediately available
+(e.g, as data members accessors) but their return values could also be
+computed on the spot, by simply referring to the corresponding structured
+binding variable.
+
+To illustrate the abovementioned steps for associating structured bindings
+with class members we use these classes:
+    verbinsert(-s4 //+1 examples/bindings.cc)
+
+The first step towards allowing structured bindings for tt(Data) consists of
+defining a (member) termplate tt(get).  If tt(Data) is our own class we can
+add a member template tt(get). Alternatively, if we're only interested in
+accessing tt(Data's) public members we could derive a class tt(DataGet) from
+tt(Data), and provide that class with the tt(get) mmber template. Yet another
+possibility is to define a free tt(get) function template. The tt(get)
+function must return whatever we're interested in. To make the appropriate
+selection we use an integral type (tt(int, size_t, ...)) selector value, and
+the function template thus only has a non-type template parameter. Rather than
+defining several specializations using the tt(if constexpr) clause is advised,
+as it greatly simplifies the function's definition. 
+
+Our tt(get) function defines selector 0 for tt(factory), selector 1 for
+tt(distance) and selector 2 for tt(text). The tt(distance) member simply
+returns tt(d_euclid.distance()), and tt(Euclid::distance) is run-time
+evaluated using its tt(d_x) and tt(d_y) values. Thus, tt(distance) is an
+example of a function that will be run-time evaluated when we're referring,
+later on, to the third structured bindings variable.
+
+Here's the definition of the member template tt(get):
+    verbinsert(-s4 //+2 examples/bindings.cc)
+
+This function is still suboptimal. Consider its specialization for value 2: it
+returns tt(Data::text()). As tt(auto) merely inspects the returned data type,
+tt(get<2>()) returns a tt(std::string), rather than (text's) return type,
+which is a tt(std::string const &). To use the return types that are actually
+returned by tt(Data's) member functions, tt(get's) return type should be
+defined as tt(decltype(auto)) rather than just tt(auto):
+        verb(    template <size_t Nr>
+    decltype(auto) get() const
+    ...)
+
+When defining tt(get) as a free function template it must be provided with a
+parameter tt(Data const &data) (or tt(Data &data) if members are used that may
+modify tt(data's) data members), returning the parameter's member
+functions. E.g.,
+        verb(        // get as a free function template:
+    template <size_t Nr>
+    decltype(auto) get(Data const &data)
+    {
+        if constexpr (Nr == 0)
+            return data.factory();
+    
+        if constexpr (Nr == 1)
+            return data.distance();
+    
+        ... // (etc)
+    })
+
+Now that step 1 has been completed, we turn our attention to the
+tt(std::tuple) specializations. These specializations 
+    hi(std namespace: additions OK) are defined inside the tt(std) namespace
+(using tt(namespace std { ... }) or tt(std::tuple...)).
+
+The specialization of tt(std::tuple_size) for tt(Data) defines 
+tt(static size_t const value) as the number of index values
+that can be specified with the tt(get<idx>) function:
+    verbinsert(-s4 //+3 examples/bindings.cc)
+
+The specialization of tt(std::tuple_element) for tt(Data) returns the types
+matching the various return types of the tt(get) member template. Its
+implementation also provides a nice example where tt(declval) is used: the
+return type of the tt(get<Nr>) specialization must be determined. But to
+obtain that return type a tt(Data) object is required, which isn't available
+by just mentioning tt(Data) in tt(tupe_element's) specialization. However,
+tt(declval<Data>()) defines an rvalue reference, which em(can) be passed to
+tt(get<Nr>). But the function's return em(value) isn't required, so the object
+doesn't have to be constructed. Only its return type is needed. Hence, by
+surrounding the tt(get<Nr>) call by tt(decltype) no object is constructed, and
+merely its return type is used:
+    verbinsert(-s4 //+4 examples/bindings.cc)
+
+As tt(tuple_size) and tt(tuple_element) are directly associated with the class
+tt(Data) their definitions should be provided in tt(Data's) header file, below
+tt(Data's) class interface.
+
+Here's how this could be used in a tt(main) function, showing single object
+access and access using a range-based for-loop:
+    verbinsert(-s4 //+5 examples/bindings.cc)

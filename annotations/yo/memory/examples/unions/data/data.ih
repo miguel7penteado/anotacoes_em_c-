@@ -1,0 +1,9 @@
+#include "data.h"
+
+#include <iostream>
+#define CERR std::cerr << __FILE__": "
+
+#include <cstring>
+#include <utility>
+
+using namespace std;

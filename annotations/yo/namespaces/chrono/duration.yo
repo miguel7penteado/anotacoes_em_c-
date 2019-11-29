@@ -1,0 +1,112 @@
+Amounts of time are specified through objects of the class
+    hi(duration)tt(std::chrono::duration).
+
+Before using the class tt(duration) the tthi(chrono) header file must be
+included.
+
+Like tt(ratio) the class tt(duration) requires two template
+arguments. A numeric type (tt(int64_t) is normally used) defining the type
+holding the duration's amount of time, and a time-resolution (called its
+em(resolution)), usually specified through a tt(std::ratio)-type (often using
+one of its tt(chrono) abbreviations). 
+
+Using the predefined tt(std::deca ratio), representing units of 10 seconds an
+interval of 30 minutes is defined as follows:
+        verb(    duration<int64_t, std::deca> halfHr(180);)
+
+Here tt(halfHr) represents a time interval of 180 deca-seconds, so 1800
+seconds. Comparable to the predefined ratios predefined duration types are
+available:
+    center(
+    tbl(lll)(\
+    tline()()\
+    tr(tc(i(nanoseconds))tc(nbsp())tc(tt(duration<int64_t, nano>)))\
+    tr(tc(i(microseconds))tc(nbsp())tc(tt(duration<int64_t, micro>)))\
+    tr(tc(i(milliseconds))tc(nbsp())tc(tt(duration<int64_t, milli>)))\
+    tr(tc(i(seconds))tc(nbsp())tc(tt(duration<int64_t>)))\
+    tr(tc(i(minutes))tc(nbsp())tc(tt(duration<int64_t, ratio<60>>)))\
+    tr(tc(i(hours))tc(nbsp())tc(tt(duration<int64_t, ratio<3600>>)))\
+    tline()()\
+    ))
+    Using these types, a time amount of 30 minutes can now simply be defined
+as tt(minutes halfHour(30)).
+
+The two types that were specified when defining a tt(duration<Type,
+Resolution>)  can be retrieved as,
+respectively,
+    itemization(
+    itt(rep), which is equivalent to the numeric type (like
+        tt(int64_t)). E.g., tt(seconds::rep) is equivalent to tt(int64_t);
+
+    itt(period), which is equivalent to the tt(ratio) type (like tt(kilo)) and
+        so tt(duration<int, kilo>::period::num) is equal to 1.
+    )
+
+COMMENT(all constexpr, the constructor: explicit)
+Duration objects can be constructed by specifying an argument of its numeric
+type:
+    itemization(
+    itt(duration(Type const &value)):nl()
+        a specific duration of tt(value) time units. tt(Type) refers to
+        the duration's numeric type (e.g., tt(int64_t)). So, when defining
+        verb(    minutes halfHour(30);)
+
+the argument 30 is stored inside its tt(int64_t) data member.
+    )
+    Duration supports copy- and move-constructors (cf. chapter ref(MEMORY))
+and its default constructor initializes its tt(int64_t) data member to zero.
+
+The amount of time stored in a duration object may be modified by adding or
+subtracting two duration objects or by multiplying, dividing, or computing a
+modulo value of its data member. Numeric multiplication operands may be used as
+left-hand side or right-hand side operands; in combination with the other
+multiplication operators the numeric operands must be used as right-hand side
+operands. Compound assignment operators are also available. Some examples:
+        verb(    minutes fullHour = minutes{ 30 } + halfHour;
+    fullHour = 2 * halfHour;
+    halfHour = fullHour / 2;
+    fullHour = halfHour + halfHour;
+
+    halfHour /= 2;
+    halfHour *= 2;)
+
+In addition, tt(duration) offers the following members (the first member is an
+ordinary member function requiring a tt(duration) object). The other three are
+static members (cf. chapter ref(StaticDataFun)) which can be used without
+requiring objects (as shown at the tt(zero) code snippet):
+    itemization(
+    itt(Type count() const) returns the value that is stored inside
+        the tt(duration) object's data member. For tt(halfHour) it returns 30,
+        not 1800;
+
+    itt(duration<Type, Resolution>::zero()):nl() 
+        this is an (immutable) duration object whose tt(count) member returns
+        0. E.g.:
+      verb(    seconds::zero().count();    // equals int64_t 0)
+
+    itt(duration<Type, Resolution>::min()):nl()
+        an immutable duration object whose tt(count) member returns the lowest
+        value of its tt(Type) (i.e., tt(std::numeric_limits<Type>::min())
+        (cf. section ref(NUMLIM)));
+    
+    itt( duration<Type, Resolution>::max()):nl()
+        an immutable duration object whose tt(count) member returns the lowest
+        value of its tt(Type) (i.e., tt(std::numeric_limits<Type>::max())).
+    )
+
+Duration objects using different resolutions may be combined as long as
+no precision is lost. When duration objects using different resolutions 
+are combined the resulting resolution is the finer of the two. When compound
+binary operators are used the receiving object's resolution must be the finer
+or the compilation fails.
+        verb(    minutes halfHour{ 30 };
+    hours oneHour{ 1 };
+
+    cout << (oneHour + halfHour).count();   // displays: 90
+
+    halfHour += oneHour;            // OK
+    // oneHour += halfHours;        // won't compile)
+
+The suffixes tt(h, min, s, ms, us, ns) can be used for integral
+values, creating the corresponding tt(duration) time intervals. E.g., 
+tt(minutes min = 1h) stores 60 in tt(min).

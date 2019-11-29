@@ -1,0 +1,25 @@
+Type requirements specify types that must be available when using an actual
+argument type. This normally refers to sub-types of the concept's parameter
+type. In this case the tt(requires) specification does not require tt(Type)
+parameters, and so its parameter list remains empty, and the constraint is
+directly applied to the concept's type parameter:
+        verb(    template <typename Type> 
+    concept bool HasValueType =
+        requires()
+        {
+            typename Type::value_type;
+        };)
+
+Types specified in type requirements don't necessarily refer to types
+defined by tt(Type) using a tt(typedef) specification. These types may also be
+the names of nested classes or enumerations defined by tt(Type). When using
+enumeration names these enumerations do not have to be strongly typed
+enumerations. 
+
+    Type requirements do not necessarily require separate tt(requires)
+specifications. Once a tt(requires) specification is used it may also contain
+type requirements. E.g.:
+        verbinsert(-sn4 //type examples/type.cc)
+    Calling tt(iter) with a tt(string) argument succeeds, calling it with a
+tt(queue) argument results in two error notices: no tt(Type::iterator) and not
+tt(tp.begin()).

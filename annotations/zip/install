@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cd svg
+
+eps=`find ./ -type f -name '*.eps'`
+
+for x in $eps
+do
+    tar cf - $x | tar -C ../eps -xf -           | exit 1
+    tar cf - $x | tar -C ../../latex -xf -      | exit 1
+    rm $x                                       | exit 1
+done
+
+
+    # converteer .pdf to .gif, cp .gif to ../../html, 
+    # and move .gif files to ../gif
+for x in `find ./ -type f -name '*.pdf'`
+do
+    gif=${x%%pdf}gif
+
+    convert $x ${x%%pdf}gif                    | exit 1
+    tar cf - $gif | tar -C ../gif -xf -        | exit 1
+    tar cf - $gif | tar -C ../../html -xf -    | exit 1
+
+    rm $x $gif                                 | exit 1
+done
+
+

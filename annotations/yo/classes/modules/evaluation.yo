@@ -1,0 +1,84 @@
+As mentioned in the introductory section, modules reduce the compiler's
+workload by performing em(h + s) instead of em(h * s) header compilations when
+em(s) sources each including tt(h) header files are compiled. Furthermore,
+using modules no longer requires the use of include guards or other defensive
+measures to avoid repeated inclusion of headers, which is particularly
+unwelcome in bf(C++) as bf(C++) header files typically not only declare
+functions and variables, but also define class interfaces and templates
+(cf. chapter ref(TEMPLATES) and beyond). 
+
+So what's the gain? In this final section about modules we compare the
+compilation  times of a relatively large program (ti(bisonc++), cf. 
+    lurl(http://fbb-git.gitlab.io/bisoncpp/)), consisting of almost 30
+classes.
+
+Compilation is performed by tt(clang++-7), using three variants:
+    itemization(
+    it() Plain compilation, using the compiler options 
+            verb(--std=c++2a -Wall -O2 -pthread)
+
+it() Compilation using a module. The module tt(bisoncpp) was first created
+        using the compiler options 
+       verb(-fmodules --std=c++2a -Wall -O2 -pthread)
+
+and merely compiling tt(main.cc). The generated module was
+        tt(bisoncpp-2VBAIMWQCR12B.pcm), whose size was 13 MB. Following the
+        module's construction the tt(main.o) file was removed and the program
+        was built using the above options (so including tt(-fmodules)).
+
+    it() Finally, the program was compiled not using modules, but using
+        precompiled headers. The precompiled headers were created as part of
+        the compilation process. The total size of all precompiled headers was
+        MB, which is fairly large, but as the precompiled headers are only
+        used for the compilation they can be removed once the program has been
+        compiled. 
+    )
+
+Compilating tt(bisonc++) using the plain source files (no module, no
+precompiled headers) required slightly more than 7 minutes. The bf(time)(1)
+program reported:
+    verb(    442.894u 25.751s 7:57.73 98.0%  0+0k 6416+14560io 31pf+0w)
+
+It took Gnu's tt(g++) compiler a comparable amount of time to compile the
+sources:
+    verb(    467.053u 32.818s 8:20.39 99.8%  0+0k 1064+26264io 10pf+0w)
+
+This comparison is important, as we'll see below.
+
+Next, after first constructing the program's module, and then timing the full
+program's construction bf(time) reported:
+    verb(    420.305u 23.804s 7:29.43 98.8%  0+0k 0+39672io 0pf+0w)
+
+A somewhat unexpected (and disappointing) result. There is a minimal gain
+in compilation time, but it's marginal. In fact at a second attempt a
+compilation time of 458 seconds was reported. Some variation is to be
+expected, but the compilation times of both methods clearly don't notably
+differ. 
+
+Finally using precompiled headers. For this test Gnu's tt(g++) compiler was
+used, as tt(clang) doesn't automatically use available precompiled headers
+(cf. 
+    url(clang's users manual)(
+    https://clang.llvm.org/docs/UsersManual.html#using-a-pch-file)). At the
+start of the compilation process the headers used by tt(bisonc++'s) almost 500
+source files were first precompiled (the time it took to precompile the
+headers is included in the time reported below). Now bf(time) reported:
+    verb(    138.040u 18.447s 2:38.57 98.6%  0+0k 32+2245104io 0pf+0w)
+
+The total size of the precompiled headers is definitely exceeding the size
+of the module tt(bisoncpp-2VBAIMWQCR12B.pcm): 1.1 GB. But then, the
+compilation time is reduced to about 1/3rd of the other two compilation
+methods.
+
+Considering the above results the added benefit of using modules isn't
+immediately clear. Using modules doesn't result in an observable gain in
+compilation time, and so the main advantage appears to be that include guards
+are no longer required. Personally, I've em(never) experienced problems with
+using include guards. Using of long, capitalized preprocessor identifiers
+has never been a problem, and has never resulted in colliding identifiers. 
+
+On the other hand, modules are a new element of bf(C++) and the tt(clang)
+documentation explicitly states that the compiler's implementation and module
+definition language is subject to future changes. In that respect, modules are
+definitely an interesting addition to bf(C++) that is absolutely worth
+monitoring.

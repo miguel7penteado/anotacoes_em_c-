@@ -1,0 +1,128 @@
+The ti(module.modulemap) file defines the organization of one or more
+modules. It relates header files to defined module(s). The name
+tt(module.modulemap) is a predefined name, and module specifications must use
+this name. tt(Module.modulemap) files may contain comment: standard bf(C)
+and/or end-of-line comment.
+
+A emi(module specification) defines a name and possibly options for a
+module. The elements of a module specification are specified inside a
+curly-braced section (note that when using [xxx] the square brackets are
+em(not) optional).
+
+The following description does not cover the full syntax of tt(module.map), as
+some specifications apply only to some operating systems. For the full
+description the reader is referred to the 
+lurl(http://clang.llvm.org/docs/Modules.html) document.
+
+The generic layout of a tt(module.modulemap) file starts with the module
+header, defining the name of the module. This name is used as the first part
+of the compiled module file (e.g., tt(minimal-2ORZEBL9H54OZ.pcm) for a module
+called tt(minimal)). Different programs may use identical module names, as
+modules receives unique `last names' (in the example: tt(2ORZEBL9H54OZ)).
+
+Inside a module definition headers commonly are included in module
+specifications of their own. So the generic syntax looks like this (in the
+syntax specifications the following conventions are used: blank lines separate
+syntax definitions; syntax elements followed by a tt(*) may be omitted or may
+be used once or multiple times; vertical bars separate alternatives; quoted
+names and characters should literally be used, without the quotes; tt('ident')
+must be replaced by a standard bf(C++) identifier; double quoted strings are
+NTBSs, (their meanings are provided inside the double quoted strings); syntax
+elements preceded by tt(opt_) (e.g., tt('opt_[extern_c]')) are optional (such
+elements are either omitted or are used without the tt(opt_) prefix:
+tt('opt_[extern_c]') means: tt([extern_c]))):
+        verb(    module-declarations:
+        module_declaration*
+            
+    module_declaration:              
+        header
+        '{'
+            module_member*
+        '}'
+    |
+        'extern' 'module' 'ident' " TO DO "
+
+    header:
+        'module' 'ident' 'opt_[extern_c]'   // [extern_c]: the module holds
+                                            // C code that can be used from 
+                                            // within C++
+    module_member:
+        cf_modules_html             // refer to clang's Modules.html document
+    |                               // for these member declarations
+        export_declaration
+    |
+        header_declaration
+    |
+        link_declaration
+    |
+        module_declarations         // nested declarations are commonly used
+    |
+        requires_declaration
+    |
+        umbrella_dir_declaration
+
+
+    cf_modules_html:
+        config_macros_declaration
+    |
+        conflict_declaration
+    |
+        export_as_declaration
+    |
+        submodule_declaration
+    |
+        use_declaration
+
+
+    export_declaration:             // see below
+        'export' module_id          
+
+
+    feature_list:                   // see below
+        feature_list ',' 'ident'    
+    |
+        'ident'
+
+    header_declaration:
+    
+    link_declaration:               // add '-llibraryName' to the linker 
+        'link' "libraryName"        // when using the module
+    
+    requires_declaration
+        'requires' 'opt_!' feature_list
+    
+    umbrella_dir_declaration
+        'umbrella' "directory-specification"    // e.g., ".", see below)
+
+In this overview,
+
+    itemization(
+    itt(export_declaration) specifies a tt(module_id) which is the
+        name of the module that will be visible from the defined
+        modules. These names refer to headers (without the .h extension) that
+        are made visible from the current module. Usually everything is made
+        available, for which tt(export *) is commonly used. Refer to the
+        tt(Modules.html) document for additional info about using tt(export).
+
+    itt(feature_list) is used to specify languages or architectures for which
+        the module is available. For bf(C++) the relevant features are
+        em(cplusplus, cplusplus11, cplusplus14, cplusplus17, tls). A
+        tt(cplusplsus2a) feature is not (yet?) available. The tt(tls) feature
+        means: thread local storage must be available. nl()
+       Example: tt(requires cplusplus).
+
+    itt(umbrella_dir_declaration) is used to indicate that all headers in and
+        below the specified directory must be added to the module. Directory
+        specification tt(".")  refers to all headers in and below the current
+        directory.
+    )
+
+Usually when defining a a module its tt(module.modulemap) defines the module's
+name, and then uses the headers of its (sub)directories to define submodules
+for each directory, exporting all their symbols. E.g., the program
+bf(ssh-cron) (cf. lurl(https://fbb-git.gitlab.io/ssh-cron/)) defines eight
+classes, each in its own subdirectory. To create the module tt(ssh_cron) the
+following tt(module.modulemap) can be used:
+        verbinsert(-as4 examples/ssh-cron.map)
+    resulting in the module tt(ssh_cron-2D64GM0XFP9U2.pcm) which is about 11MB
+large.

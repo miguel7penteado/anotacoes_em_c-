@@ -1,0 +1,71 @@
+tt(Error_condition)hi(error_condition) objects contain information about
+`higher level' types of errors. They are supposed to be platform independent
+like syntax errors or non-existing requests.
+
+Error condition objects are returned by the member tt(default_error_condition)
+of the classes tt(error_code) and tt(error_category), and they are returned by
+the function hi(make_error_condition)tt(std::error_condition
+make_error_condition(ErrorConditionEnum ec)). The type name
+tt(ErrorConditionEnum) is a formal name for an tt(enum class) that enumerates
+the `higher level' error types. The tt(error_condition) objects returned by
+tt(make_error_condition) are initialized with tt(ec) and the
+tt(error_category) that uses the tt(ErrorConditionEnum).  Defining your own
+tt(ErrorConditionEnum) is covered in section ref(ERRCODEENUM).
+
+bf(Constructors):
+    itemization(
+    ittq(error_condition() noexcept)
+       (the object's value is initialized to `no error' (i.e., 0) and
+        a tt(system_category) error category;)
+
+    it() The copy constructor is available;
+
+    ittq(error_condition(int ec, error_category const &cat) noexcept)
+       (the object's value is initialized to tt(ec) and error category
+        tt(cat). It is the responsibility of the caller to ensure that tt(ec)
+        represents a (cast to tt(int)) value of tt(cat's) error condition
+        enumeration;)
+
+    ittq(error_condition(ErrorConditionEnum value) noexcept)
+       (this is a member template (cf. section ref(MEMTEMP)), using template
+        header tt(template <class ErrorConditionEnum>). It initializes the
+        object with the return value of
+        tt(make_error_condition(value));)
+    )
+
+bf(Members):
+    itemization(
+    it() The copy assignment operator and an assignment operator accepting an
+        tt(ErrorConditionEnum) are available;
+
+    ittq(void assign(int val, error_category const &cat))
+       (assigns new values to the current object's em(value) and
+        em(category) data members;)
+
+    ittq(error_category const &category() const noexcept)
+       (returns a reference to the object's error category (note that this is
+        a reference to the category's singleton object);)
+
+    ittq(void clear() noexcept)
+       (after calling this member em(value) is set to 0 and the object's error
+        em(category) set to tt(generic_category);)
+
+    ittq(string message() const)
+       (returns tt(category().message(value()));)
+
+    ittq(explicit operator bool() const noexcept)
+       (returns tt(true) if tt(value()) returns a non-zero value (so its
+        semantic meaning is `the object represents an error');)
+
+    ittq(int value() const noexcept)
+       (returns the object's error value.)
+    )
+
+Two tt(error_condition) objects can be compared for (in)equality, and can be
+ordered using tt(operator<). Ordering is pointless if the two objects refer to
+different error categories. If the categories of two objects are different 
+they are considered different.
+
+
+
+

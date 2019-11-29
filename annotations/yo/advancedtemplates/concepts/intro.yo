@@ -1,0 +1,115 @@
+COMMENT(See intro.txt for stuff ISN)
+
+Although the term emi(static polymorphism) is coined for the situation 
+where templates are used (as the behavior of a template class may
+vary over different types that are specified when instantiating the template),
+there em(is) a difference with traditional emi(dynamic polymorphism) based on
+the well-known i(vtable).
+
+As the polymorphic derived class also serves as a base class the compiler
+is able to verify this once a derived class object is passed to a function
+defining a base class reference or pointer parameter. But such a verification
+is not possible when templates are used. In fact, anything is possible as long
+as it represents valid bf(C++) syntax, up to the point where instantiations
+are encountered. Only then the actually available interface is matched against
+the requirements of the function template.
+
+The C2a standard introduces emi(concepts) allowing the programmer to specify
+em(requirements) for types that are used when instantiating templates. This,
+in turn, allows the compiler to verify at template instantiation time whether
+acceptable types were specified. This, in turn, allows the compiler to improve
+the quality of its error messages.
+
+Compiler messages generated as a result of some template-related error are
+notoriously difficult to read. These error messages may be several kBytes
+large, and have been called `the compiler's error novelle' by some writers.
+Nonetheless, there are various reasons for these long error messsages and
+often some tricks, which may be compiler-dependent, may help us to understand
+the nature of the error. Here are two common reasons for these long and complex
+template-related error messages:
+    itemization(
+    it() As the compiler cannot know what is and what isn't important with
+        respect to the actual instantiated template parameters it must write
+        their definitions in full.
+    it() The actual error is usually found deep inside the definition of a
+        function template. Such a function may very well be called after
+        scores of functions have been called from the original statement
+        written by the programmer. Consequently it requires more than average
+        experience for the programmer to analyze this call-trace and to find
+        the location in the program sources that caused the error. That isn't
+        all: once the location is found the programmer also must be able to
+        understand what has actually gone wrong.
+    )
+
+Concepts were primarily added to the language to simplify the above problems.
+Concepts specify requirements for template types. Also, concepts may be
+considered template parameter type names, and those concept type names may
+then directly be specified instead of using the completely generic
+`tt(typename)' which is traditionally used when specifying template type
+parameters.
+
+Although concepts currently have not yet completely been implemented by the
+tt(g++) compiler several examples illustrating the ideas behind concepts and
+how they are used can already be provided. As an opening illustration:
+consider a function template tt(add) returning the sum of its two
+arguments. Let's assume that a concept tt(Addable) somehow has been
+defined. Rather than using the plain tt(typename Type) the function template
+can now be defined as:
+        verb(    template<Addable Type>
+    Type add(Type const &lhs, Type const &rhs)
+    {
+        return lhs + rhs;
+    })
+
+From now on every type that is actually passed to tt(add) must be a
+type satisfying the tt(Addable) requirements. Here are two expressions
+using tt(add):
+        verb(    add("first"s, "second"s);               // (1)
+    add(map<int, int>{}, map<int, int>{});  // (2))
+
+Expression (1) flawlessly compiles as tt(string) objects can be added;
+expression (2) fails with the compiler reporting
+something like
+    verb(    error: cannot call function `Type add(const Type&, const Type&) 
+            [with Type = std::map<int, int>]'
+     add(map<int, int>{}, map<int, int>{});
+
+    note:   constraints not satisfied
+             Type add(Type const &x, Type const &y)
+    ...
+    note: the required expression `(lh + rh)' would be ill-formed)
+
+COMMENT(examples/intro1.cc)
+
+  The error message's final note clearly states the cause of the problem: you
+can't add two maps. There's no doubt that we'll start appreciating concepts
+after comparing this example to what we encounter when not using
+concepts. Let's define the tt(add) function template in the traditional way:
+        verb(    template<typename Type>
+    Type add(Type const &lhs, Type const &rhs)
+    {
+        return lhs + rhs;
+    })
+
+Using this definition of tt(add) the compiler produces some 17 kB of error
+messages, spread out over more than 200 lines. 
+
+In the upcoming subsections we'll have a closer look at how concepts can be
+defined, what kind of requirements can be formulated, and how they can be used
+in practice. 
+
+Concepts are used to define requirements for template type
+arguments. Variables of such types must be, e.g., addable, or the type must
+define sub-types like tt(iterator) or tt(value_type). Concept names, like
+class names, type names, function names, and variable names should
+suggest their purpose. Don't name a concept `tt(Constraint)' or `tt(Concept)',
+but use names like `tt(Addable)' and `tt(HasValueType)'. Concept names show up
+in template definitions like
+        verb(    template <Addable Type>
+    ...)
+
+which directly conveys the purpose of the concept, doing that much better
+than, e.g.,
+        verb(    template <Constraint Type>
+    ...)
+

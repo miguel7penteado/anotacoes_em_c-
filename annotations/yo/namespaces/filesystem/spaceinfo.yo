@@ -1,0 +1,26 @@
+Every existing tt(path) lives in a file system, Sizes of file systems
+typically are quite large, but there is a limit to their sizes.
+
+The size of file systems, the number of bytes that is currently being used
+and the remaining number of bytes is made available by the function 
+    hi(space(_info))hi(available space) tt(space(path const &entry [,
+error_code &ec])), returning the information about the file system containing
+tt(entry) in a POD tt(struct space_info).
+
+If the tt(error_code) argument is provided then it is cleared if no error
+occurs, and set to the operating system's error code if an error has
+occurred. If an error occurs and the tt(error_code) argument was not provided
+then a tt(filesystem_error) exception is thrown, receiving tt(path) as its
+first argument and the operating system's error code as its tt(error_code)
+argument.  
+
+The returned tt(space_info) has three fields:
+        verb(    uintmax_t capacity;     // total size in bytes
+    uintmax_t free;         // number of free bytes on the file system
+    uintmax_t available;    // free bytes for a non-privileged process)
+
+If a field cannot be determined it is set to -1 (i.e., the max. value of
+the type tt(uintmax_t)). 
+
+The function can be used this way:
+        verbinsert(-s4 //demo examples/spaceinfo.cc)

@@ -1,0 +1,99 @@
+Single moments in time can be specified through objects of 
+the class hi(time_point)tt(std::chrono::time_point).
+
+Before using the class tt(time_point) the tthi(chrono) header file must be
+included.
+
+Like tt(duration) the class tt(time_point) requires two template arguments: A
+clock type and a duration type. Usually tt(system_clock) is used as the
+clock's type using tt(nanoseconds) as the default duration type (it may be
+omitted if tt(nanoseconds) is the intended duration type). Otherwise specify
+the duration type as the tt(time_point's) second template argument. The
+following two time point definitions therefore use identifcal time point
+types:
+        verb(    time_point<standard_clock, nanoseconds> tp1;
+    time_point<standard_clock> tp2;)
+
+The class tt(time_point) supports three constructors:
+    itemization(
+    itt(time_point()):nl()
+       the default constructor is initialized to the beginning of the clock's
+        emi(epoch). For tt(system_clock) it is January, 1, 1970, 00:00h, but
+        notice that tt(filesystem::__file_clock) uses a different epoch
+        (see section ref(FILECLOCK) below);
+
+    itt(time_point(time_point<Clock, Duration> const &other)):nl()
+       the copy constructor (cf. chapter ref(MEMORY)) initializes a
+        tt(time_point) object using the time point defined by tt(other). If
+        tt(other's) resolution uses a larger period than the period of the
+        constructed object then tt(other's) point in time is represented in
+        the constructed object's resolution (an illustration is provided
+        below, at the description of the member tt(time_since_epoch));
+
+    itt(time_point(time_point<Clock, Duration> const &&tmp)):nl()
+       the move constructor (cf. chapter ref(MEMORY)) acts comparably to the
+        copy constructor, converting tt(tmp's) resolution to the constructed
+        object while moving tt(tmp) to the constructed object.
+    )
+
+The following operators and members are available:
+    itemization(
+    itt(time_point &operator+=(duration const &amount)):nl()
+       The amount of time represented by tt(amount) is added to the current
+        tt(time_point) object. This operator is also available as binary
+        arithmetic operator using a tt(time_point const &) and a tt(duration
+        const &) operand (in any order). Example:
+       verb(    system_clock::now() + seconds{ 5 };)
+
+    itt(time_point &operator-=(duration const &amount)):nl()
+       The amount of time represented by tt(amount) is subtracted from the
+        current tt(time_point) object. This operator is also available as
+        binary arithmetic operator using a tt(time_point const &) and a
+        tt(duration const &) operand (in any order). Example:
+       verb(    time_point<system_clock> point = system_clock::now();
+    point -= seconds{ 5 };)
+
+    itht(time_since_epoch)(duration time_since_epoch() const):nl()
+       tt(duration) is the duration type used by the time point object for
+        which this member is called. It returns the amount of time
+        since the epoch that's represented by the object.
+
+    itt(time_point min() const):nl()
+       a static member returning the time point's tt(duration::min)
+        value. Example:
+       verb(    cout << 
+        time_point<system_clock>::min().time_since_epoch().count() << '\n';
+        // shows -9223372036854775808)
+
+    itt(time_point max() const):nl() 
+       a static member returning the time point's tt(duration::max)
+        value.
+    )
+
+All predefined clocks use nanoseconds as their time resolution. To express the
+time in a less precise resolution take one unit of time of the less precise
+resolution (e.g., tt(hours(1))) and convert it to nanoseconds. Then divide the
+value returned by the time point's tt(time_since_epoch().count()) member by
+tt(count) member of the less precise resolution converted to
+nanoseconds. Using this procedure the number of hours passed since the
+beginning of the epoch can be determined:
+        verb(    cout << system_clock::now().time_since_epoch().count() /
+            nanoseconds(hours(1)).count() << 
+            " hours since the epoch\n";)
+
+Time point objects based on the system clock or on the high resolution clock
+can be converted to tt(std::time_t) (or the equivalent type tt(time_t))
+values. Such tt(time_t) values are used when converting time to text. For such
+conversions the em(manipulator) tt(put_time) (cf. section ref(IOFORMAT)) is
+commonly used, but tt(put_time) must be provided with the address of a
+tt(std::tm) object, which in turn can be obtained from a tt(std::time_t)
+value. The whole process is fairly complex, and the core elements are
+visualized in figure ref(TIMEIMG).
+    figure(threading/time)(Time according to bf(C++))(TIMEIMG)
+
+The essential step eventually leading to the insertion of a time point's value
+into a tt(std::ostream) consists of using
+tt(system_clock::to_time_t(time_point<system_clock> const &tp)) to convert a
+time point to a tt(time_t) value (instead of using tt(system_clock) the
+tt(high_resolution_clock) can also be used). How a time point can be inserted
+into a tt(std::ostream) is described in section ref(PUTTIME).

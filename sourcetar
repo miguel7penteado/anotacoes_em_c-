@@ -1,0 +1,50 @@
+#!/bin/bash
+
+PROJECT=annotations
+
+cd ~/git/${PROJECT}/src
+
+VERSION=`grep DOCVERSION ${PROJECT}/yo/version.yo |
+                        sed 's/SUBST(DOCVERSION)(\(.*\))/\1/'`
+
+DISTRIBUTION=c++-${PROJECT}-${VERSION}   # define the distribution's dir name
+
+tgz()
+{
+    ln -s ${PROJECT} ${DISTRIBUTION}    # distribution's dir name
+
+    tar czvf $1 --exclude-from=excluded  ${DISTRIBUTION}/*
+
+    rm ${DISTRIBUTION}                      # rm the link
+}
+
+case "$1" in 
+    (d)
+        tgz ../tarballs/c++-${PROJECT}_${VERSION}.orig.tar.gz
+    ;;
+
+    (l|u)
+        tgz c++-${PROJECT}_${VERSION}.tar.gz
+
+        if [ "$1" == "u" ]
+        then
+            scp c++-${PROJECT}_${VERSION}.tar.gz \
+                                    oosix.icce.rug.nl:ftp/debian/${PROJECT}
+            md5sum c++-${PROJECT}_${VERSION}.tar.gz
+            rm c++-${PROJECT}_${VERSION}.tar.gz
+        fi
+    ;;
+
+    (*)
+        echo "
+Provide arg:
+    d (debian) to create a local .orig.tar.gz archive in 
+               ../tarballs/
+    l (local)  to create ${PROJECT}_${VERSION}.tar.gz in this directory
+    u (upload) same as 't', but upload to oosix and show MD5 hash
+"
+    exit 1
+    ;;
+
+esac
+

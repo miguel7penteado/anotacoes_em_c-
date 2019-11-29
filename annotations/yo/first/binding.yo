@@ -1,0 +1,108 @@
+Usually functions return single-valued results: tt(doubles, ints, strings),
+etc. When functions need to return multiple values a em(return by argument)
+construction is often used, where addresses of variables that live outside of
+the called function are passed to functions, allowing the functions to assign
+new values to those variables. 
+
+When multiple values should be em(returned) from a function a tt(struct) can
+be used, but em(pairs) (cf. section ref(PAIR)) or em(tuples) (cf. section
+ref(TUPLES)) can also be used. Here's a simple example, where a function
+tt(fun) returns a tt(struct) having two data fields:
+        verb(    struct Return
+    {
+        int first;
+        double second;
+    };
+    
+    Return fun()
+    {
+        return Return{ 1, 12.5 };
+    })
+
+(Briefly forward referencing to sections ref(PAIR) and ref(TUPLES): the
+tt(struct) definition can completely  be omitted if tt(fun) returns a
+tt(pair) or tt(tuple). In those cases the following code remains valid.)
+
+    A function em(calling) tt(fun) traditionally defines a variable
+of the same type as tt(fun's) return type, and then uses that variable's
+fields to access tt(first) and tt(second). If you don't like the typing,
+tt(auto) can also be used:
+        verb(    int main()
+    {
+        auto r1 = fun();
+        cout << r1.first;
+    })
+
+Instead of referring to the elements of the returned tt(struct, pair) or
+tt(tuple) em(structured binding declarations) can also be used. Here, tt(auto)
+is followed by a (square brackets surrounded) comma-separated list of
+variables, where each variable is em(defined), and receives the value of the
+corresponding field or element of the called function's return value. So, the
+above tt(main) function can also be written like this:
+        verb(    int main()
+    {
+        auto [one, two] = fun();
+        cout << one;                // one and two: now defined
+    })
+
+Merely specifying  tt(auto) results in tt(fun's) return value being
+copied, and the structured bindings variables will refer to the copied value. 
+But structured binding declarations can also be used in combination with
+(lvalue/rvalue) return values. The following ensures that tt(rone) and 
+tt(rtwo) refer to the elements of tt(fun's) anonymous return value:
+        verb(    int main()
+    {
+        auto &&[rone, rtwo] = fun();
+    })
+
+If the called function returns a value that survives the function call
+itself, then structured binding declarations can use em(lvalue
+references). E.g.,
+        verb(    Return &fun2()
+    {
+        static Return ret{ 4, 5 };
+        return ret;
+    }
+
+    int main()
+    {
+        auto &[lone, ltwo] = fun2();    // OK: referring to ret's fields
+    })
+
+To use structured binding declarations it is not required to use function
+calls. The object providing the data can also anonymously be defined:
+        verb(    int main()
+    {
+        auto const &[lone, ltwo] = Return{ 4, 5 }; 
+        // or:
+        auto &&[lone, ltwo] = Return{ 4, 5 }; 
+    })
+
+The object doesn't even have to make its data members publicly
+available. In section tt(TUPLES) using structured bindings not necessarily
+referring to data members is covered.
+
+    Another application is found in situations where nested statements of
+tt(for) or selection statements benefit from using locally defined variables
+of various types. Such variables can easily be defined using structured
+binding declarations that are initialized from anonymous structs, pairs or
+tuples. Here is an example illustrating this:
+        verb(    // define a struct:
+    struct Three
+    {
+        size_t year;
+        double firstAmount;
+        double interest;
+    };
+    // define an array of Three objects, and process each in turn:
+    Three array[10];
+    fill(array);            // not implemented here
+
+    for (auto &[year, amount, interest]: array)
+        cout << "Year " << year << ": amount = " << amount << '\n';)
+
+When using structured bindings the structured binding declaration must
+specify all elements that are available. So if a struct has four data members
+the structured binding declaration must define four elements. To avoid
+warnings of unused variables at lease one of the variables of the structured
+binding declaration must be used.

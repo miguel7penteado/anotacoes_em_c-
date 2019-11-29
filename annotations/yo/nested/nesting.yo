@@ -1,0 +1,151 @@
+Classes can be defined inside other classes. Classes defined inside
+other classes are called hi(nested class) em(nested classes). Nested classes
+are used in situations where the nested class has a close conceptual
+relationship to its surrounding class. For example, with the class tt(string)
+a type ti(string::iterator) is available which provides all characters
+that are stored in the tt(string). This tt(string::iterator) type could be
+defined as an object ti(iterator), defined as nested class in the class
+tt(string). 
+
+Since  nested classes are defined inside other classes their members, when
+provided with references or pointers to objects of their surrounding classes,
+may access all members of those objects, even their private members.
+
+A class can be nested in every part of the surrounding class: in the
+tt(public, protected) or tt(private) section. If a class is nested in the
+tt(public) section of a class, it is
+    hi(visibility: nested classes) visible outside the surrounding class. If
+it is nested in the tt(protected) section it is visible in subclasses, derived
+from the surrounding class, if it is nested in the tt(private) section, it is
+only visible for the members of the surrounding class.
+
+The surrounding class has no special privileges with respect to the nested
+class. For example, consider the following class definition:
+        verb(    class Surround
+    {
+        public:
+            class FirstWithin
+            {
+                int d_variable;
+
+                public:
+                    FirstWithin();
+                    int var() const;
+            };
+        private:
+            class SecondWithin
+            {
+                int d_variable;
+
+                public:
+                    SecondWithin();
+                    int var() const;
+            };
+    };
+    inline int Surround::FirstWithin::var() const
+    {
+        return d_variable;
+    }
+    inline int Surround::SecondWithin::var() const
+    {
+        return d_variable;
+    })
+
+In the Annotations(), in order to save space, nested class interfaces are
+usually declared inside their surrounding class, as shown above. Often this
+can be avoided, which is desirable as it more clearly separates the outer
+class's interface and the nested class's interface. Likewise, in-class member
+implementations should be avoided. Here is an illustration of how outer- and
+nested class interfaces can be separated:
+        verb(    class Surround
+    {
+        class SecondWithin;
+
+        public:
+            class FirstWithin;
+    };
+
+    class Surround::FirstWithin
+    {
+        int d_variable;
+
+        public:
+            FirstWithin();
+            int var() const;
+    };
+
+    class Surround::SecondWithin
+    {
+        int d_variable;
+
+        public:
+            SecondWithin();
+            int var() const;
+    };)
+
+For these three classes access to members is defined as follows:
+        itemization(
+        it() The class tt(Surround::FirstWithin) is visible outside and inside
+tt(Surround). The class tt(Surround::FirstWithin) thus has  global visibility.
+        it() tt(FirstWithin)'s constructor and its member function
+tt(var) are also globally visible.
+        it() The data member tt(d_variable) is only visible to the members of
+the class tt(Surround::FirstWithin). Neither the members of tt(Surround) nor
+the members of tt(Surround::SecondWithin) can directly access
+tt(Surround::FirstWithin::d_variable).
+        it() The class tt(Surround::SecondWithin) is only visible inside
+tt(Surround). The public members of the class tt(Surround::SecondWithin) can
+also be used by the members of the class tt(Surround::FirstWithin), as nested
+classes can be considered members of their surrounding class.
+        it() tt(Surround::SecondWithin)'s constructor and its member function
+tt(var) also can only be reached by the members of tt(Surround) (and by the
+members of its nested classes).
+        it() tt(Surround::SecondWithin::d_variable) is only visible to
+tt(Surround::SecondWithin)'s members. Neither the members of tt(Surround) nor
+the members of tt(Surround::FirstWithin) can access tt(d_variable) of the
+class tt(Surround::SecondWithin) directly.
+        it() As always, an object of the class type is required before
+its members can be called. This also holds true for nested classes.
+        )
+    To grant the surrounding class access rights to the private members of a
+nested class the nested class may declare its surrounding class as a
+friend. Conversely, as nested classes can be considered members of their
+surrounding class their member functions have full access to the outer class
+members, if they are provided with an outer class object (see section
+ref(NESTEDFRIENDS)).
+
+    Although nested classes can be considered members of the surrounding
+class, members of nested classes are em(not) members of the surrounding
+class: members of the class tt(Surround) may not directly call
+tt(FirstWithin::var). This is understandable considering that a
+tt(Surround) object is not also a tt(FirstWithin) or tt(SecondWithin)
+object. In fact, nested classes are just typenames. It is not implied that
+objects of such classes automatically exist in the surrounding class. If a
+member of the surrounding class should use a (non-static) member of a nested
+class then the surrounding class must define a nested class object, which can
+thereupon be used by the members of the surrounding class to use members of
+the nested class.
+
+    For example, in the following class definition there is a surrounding
+class tt(Outer) and a nested class tt(Inner). The class tt(Outer) contains a
+member function tt(caller). The member function tt(caller) uses the
+tt(d_inner) object that is composed within tt(Outer) to call
+tt(Inner::infunction):
+        verb(    class Outer
+    {
+        public:
+            void caller();
+
+        private:
+            class Inner
+            {
+                public:
+                    void infunction();
+            };
+            Inner d_inner;      // class Inner must be known
+    };
+    void Outer::caller()
+    {
+        d_inner.infunction();
+    })
+

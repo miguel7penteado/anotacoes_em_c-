@@ -1,0 +1,76 @@
+hi(upper_bound)
+    itemization(
+        it() Header file: tt(<algorithm>)
+        it() Function prototypes:
+        itemization(
+            itt(ForwardIterator upper_bound(ForwardIterator first,
+ForwardIterator last, Type const &value);)
+            itt(ForwardIterator upper_bound(ForwardIterator first,
+ForwardIterator last, Type const &value, Compare comp);)
+        )
+        it() Description:
+        itemization(
+
+        it() The first prototype: the sorted elements (using ascending sort)
+stored in the iterator range rangett(first, last) are searched for the first
+element that is greater than tt(value). The returned iterator marks the first
+location in the sequence where tt(value) can be inserted without breaking the
+sorted order of the elements using ti(operator<) of the data type to which the
+iterators point. If no such element is found, tt(last) is returned.
+
+        it() The second prototype: the elements implied by the iterator range
+rangett(first, last) must have been sorted using the tt(comp) function or
+function object. Each element in the range is compared to tt(value) using the
+tt(comp) function. An iterator is returned pointing to the first element for
+which the binary predicate tt(comp), applied to the elements of the range and
+tt(value), returns tt(true).  The tt(comp) function object function's first
+parameter refers to tt(value) and the function object's second parameter
+refers to an element in the iterator range. 
+
+        Caveat: note that the tt(comp) object's parameters when using
+tt(upper_bound) are swapped compared to the parameters expected by
+tt(lower_bound). 
+
+        it() When the values in the iterator range were sorted in ascending
+order (i.e., using tt(operator<)) then tt(upper_bound) returns an iterator
+pointing beyond the last of a series of values equal to tt(value), while
+tt(lower_bound) returns an iterator pointing to the first of such a series of
+equal values.
+
+When the iterator range contains a series of values which are, according to
+tt(comp), equal to tt(value) then tt(upper_bound) returns an iterator to the
+first element beyond that series, while tt(lower_bound) returns an iterator to
+the first element of that series.
+
+The following program illustrates the various possibilities. Th program
+illustrates both tt(lower_bound) and tt(upper_bound) and also illustrates the
+situation where tt(value' Type) is unequal to the types of the values in the
+iterator range. Specific comment is provided below the program's code.
+        )
+
+        it() Example:
+        verbinclude(-an examples/upperbound2.cc)
+
+        itemization(
+        it() Lines 7 thru 12: the iterator range consists of a series of
+            tt(pairs), sorted by their tt(first) members.
+        it() Lines 18 thru 23: tt(lower_bound) is called using a lambda
+            expression to define the tt(Compare) function object. Note (line
+            19) that a reference to a value in the iterator range is the
+            lambda expression's first parameter, while the target value is its
+            second parameter. 
+        it() Lines 27 thru 32: here tt(upper_bound) is called, also using a
+            lambda expression. With tt(upper_bound) the target value is the
+            lambda expression's first parameter, while a reference to a value
+            in the iterator range is its second parameter. 
+        it() Lines 57 thru 62, 66 thru 71, and 75 thru 80: after sorting the
+            values in the tt(picArr) array in descending order tt(lower_bound)
+            and tt(upper_bound) are again used. This time instead of using the
+            tt(<) operator the tt(>) operator should be used.
+        )
+    )
+
+The link(binary_search)(BINSRCH) generic algorithm can be used to simply
+determine whether or nog tt(value) is present in the iterator range. The
+link(lower_bound)(LOWERBOUND) generic algorithm can be used to find the first
+element of a series of values equal to tt(value).

@@ -1,0 +1,33 @@
+void install(string base)
+{
+    g_installing = 1;
+
+#ifdef DOC
+    logZip("", "README README.papersize COPYING README.legalese changelog",
+            base + DOC);
+    logZip("tmp/docs/txt", "cplusplus.txt", base + DOC);
+
+    logZip_r("tmp/docs", "html", "cplusplus.html.zip", base + DOC);
+    logZip_r("tmp/docs/latex", "cplusplus*.ps", "cplusplus.ps.zip", 
+                                                        base + DOC);
+    logZip_r("tmp/docs/latex", "cplusplus*.pdf", "cplusplus.pdf.zip", 
+                                                        base + DOC);
+    logZip_r("tmp/docs/latex", "* -x cplusplus*.pdf -x cplusplus*ps", 
+                "cplusplus.latex.zip", base + DOC);
+    #ifdef MAN
+        logZip("tmp/manhtml", "c++-annotations-man.html", base + DOC);
+    #endif
+
+    logInstall("contributions", "*.zip", base + DOC "/contrib");
+    logZip("contributions", "GGD.algorithm "
+                "chist.html chist.pdf chist.ps "
+                "java_cpp_keywords.html", base + DOC "/contrib");
+#endif
+
+#ifdef MAN
+    logZip("tmp/man", "c++-annotations.7", base + MAN "/man7");
+#endif 
+
+    printf("\n  Installation completed\n");
+    writeLog();
+}

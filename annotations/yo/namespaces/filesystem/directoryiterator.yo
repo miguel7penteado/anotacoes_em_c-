@@ -1,0 +1,131 @@
+The tt(filesystem) namespace has two classes simplifying directory
+processing: objects of the class tt(directory_iterator) are (input) iterators
+iterating over the entries of directories; and objects of the class
+tt(recursive_directory_iterator) are (input) iterators recursively visiting
+all entries of directories.
+
+The classes tt((recursive_)directory_iterator) provides default, copy, and
+move constructors. Objects of both classes may also be constructed from a
+tt(path) and an optional tt(error_code). E.g.,
+        verb(    directory_iterator(path const &dest [, error_code &ec]);)
+
+All members of standard input iterators (cf. section ref(ITERATORS)) are
+supported. These iterators point to tt(directory_entry) objects referring to
+entries in the computer's file system. E.g.,
+        verb(    cout << *directory_iterator{ "/home" } << '\n'; // shows the first
+                                                        // entry under /home)
+
+End-iterators matching these objects are available through the default
+constructed objects of the two classes. In addition, range-based for loops can
+be used as shown by the next example:
+        verb(    for (auto &entry: directory_iterator("/var/log"))
+        cout << entry << '\n';)
+
+For-statements explicitly defining iterators can also be used:
+        verb(    for (
+        auto iter = directory_iterator("/var/log"), 
+              end = directory_iterator{}; 
+                iter != end; 
+                    ++iter
+    )
+        cout << entry << '\n';)
+
+After constructing a tt((recursive_)directory_iterator base{"/var/log"})
+object it refers to the first element of its directory. Such iterators can
+also explicitly be defined: tt(auto &iter = begin(base), auto iter =
+begin(base), auto &iter = base) or tt(auto iter = base). All these tt(iter)
+objects refer to tt(base's) data, and incrementing them also advances
+tt(base) to its next element:
+        verb(    recursive_directory_iterator base{ "/var/log/" };
+    auto iter = base;
+                                // final two elements show identical paths,
+                                // different from the first element.
+    cout << *iter << ' ' << *++iter << ' ' << *base << '\n';)
+    The functions tt(begin) and tt(end) that are used in the above examples
+are, like tt((recursive_)directory_iterator), available in the tt(filesystem)
+namespace.
+
+The tt(recursive_directory_iterator) also accepts a tt(directory_options)
+argument (see below), by default specified as tt(directory_options::none):
+        verb(    recursive_directory_iterator(path const &dest,
+                            directory_options options [, error_code &ec]);)
+
+The tt(enum class directory_options)hi(directory_options) defines values that
+are used to fine-tune the behavior of tt(recursive_directory_iterator)
+objects, supporting bitwise operators (the values of its symbols are shown
+between parentheses):
+    itemization(
+    itt(none) (0): directory symlinks are skipped, denied permission to enter
+        a subdirectory generates an error;
+    itt(follow_directory_symlink) (1): symlinks to subdirectories are
+        followed;
+    itt(skip_permission_denied) (2): directories that cannot be entered are
+        silently skipped. 
+    )
+
+The class tt(recursive_directory_iterator) also has these members:
+    itemization(
+    ithtq(depth)(int depth() const)
+       (returns the current iteration depth. The depth of the initial
+        directory, specified at construction-time, equals 0;)
+
+    ithtq(disable_recursion_pending)(void disable_recursion_pending())
+       (when called before incrementing the iterator the next directory entry
+        is not recursively visited if it is a sub-directory. Then, after
+        incrementing the iterator recursion is again allowed. If a recursion
+        should end at a specific depth then this function must repeatedly be
+        called before calling the iterator's increment operator once
+        tt(depth()) returns that specific depth;)
+
+    ithtq(increment)(recursive_directory_iterator &increment(error_code &ec))
+       (acts identically to the iterator's increment operator. However, when
+        an error occurs tt(operator++) throws a tt(filesystem_error)
+        exception, while tt(increment) assigns the error to tt(ec);)
+
+    ithtq(options)(directory_options options() const)
+       (returns the option(s) specified at construction-time;)
+
+    ithtq(pop)(void pop())
+       (ends processing the current directory, and continues at the next
+        entry in the current directory's parent. When (in a for-statement, see
+        the example below) called from the initial
+        directory that directory's processing ends;)
+
+    ithtq(recursion_pending)(bool recursion_pending() const)
+       (tt(true) is returned if recursive processing of sub-directories of the
+        currently processed directory is allowed. If so, and the directory
+        entry the iterator points at is a sub-directory then processing
+        continues at that sub-directory at the iterator's next increment;)
+    )
+    
+Here is a little program displaying all directory elements of a directory and
+of all its immediate sub-directories.
+        verb(    int main()
+    {
+        recursive_directory_iterator base{ "/var/log" };
+
+        for (auto entry = base, end = end(base); entry != end; ++entry)
+        {
+            cout << entry.depth() << ": " << *entry << '\n';
+            if (entry.depth() == 1)
+                entry.disable_recursion_pending();
+        }
+    })
+
+The above program handles entries as they come. If other strategies are needed
+they have to be implemented. E.g., a breadth-first strategy first visits all
+the non-directory entries and then visits the sub-directories. In the next
+example this is realized by processing each of the directories stored in
+tt(level) (initially it merely contains the starting directory). `Processing a
+directory' means that its non-directory entries are directly processed while
+the names of its sub-directories are stored in tt(next). Once all entries in
+tt(level) have been processed the names of the next level sub-directories are
+available in tt(next) and by assigning tt(next) to tt(level) all directories
+at the next level are processed. When reaching the most deeply nested
+sub-directories tt(next) remains empty and the tt(while) statement ends:
+    verbinsert(-s4 //code examples/breadth.cc)
+
+
+
+
+

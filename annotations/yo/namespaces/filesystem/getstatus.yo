@@ -1,0 +1,54 @@
+    The tt(filesystem) functions tt(status) and tt(symlink_status) 
+retrieve or change statuses of file system entries. These
+functions may be called with a final (optional) tt(error_code)
+argument which is assigned an appropriate error code if they cannot perform
+their tasks. If the argument is omitted the members throw exceptions if they
+cannot perform their tasks:
+    itemization(
+    ithtq(status)(file_status status(path const &dest [, error_code &ec]))
+       (returns type and attributes of tt(dest);)
+
+    ithtq(symlink_status)(file_status symlink_status(path const &dest [,
+        error_code &ec])) 
+       (when calling tt(status) of a tt(path) object that
+        represents a symbolic link the status of the entry the link refers to
+        is obtained. To obtain the status information of the symbolic link
+        itself this member should be used;)
+
+    ithtq(status_known)(bool status_known(file_status const &status))
+       (returns tt(true) if tt(status) refers to a determined status
+        (tt(status) itself may indicate that the entity referred to by
+        tt(status) does not exist). One way of receiving tt(false) is by
+        passing it a default status object: tt(status_known(file_status{}));)
+    )
+
+Once a tt(file_status) object is obtained the file type of the entry whose
+status it represents can be interrogated using these functions (defined in the
+tt(filesystem) namespace, where tt(WHATEVER) is the requested 
+specification):
+        verb(    bool is_WHATEVER(file_status status)
+    bool is_WHATEVER(path const path &entry [, error_code &ec]))
+
+These functions return tt(true) if tt(status) or tt(status) matches the
+requested type. Here are the available functions:
+    itemization(
+    iti(is_block_file): the path refers to a block device;
+    iti(is_character_file): the path refers to a character device;
+    iti(is_directory): the path refers to a directory;
+    iti(is_empty): the path refers to an empty file or directory;
+    iti(is_fifo): the path refers to a named pipe;
+    iti(is_other): the path does not refer to a directory, regular file or
+        symlink;
+    iti(is_regular_file): the path refers to a regular file;
+    iti(is_socket): the path refers to a named socket;
+    iti(is_symlink): the path refers to a symbolic link;
+    )
+
+Alternatively, the tt(file_status::type()) member can be used in, e.g., a
+tt(switch) to select an entry matching its tt(file_type) return value (see the
+previous section (ref(FSSTATUS)) for a description of the symbols defined by
+the tt(file_type) enum).
+
+    Here is a little program showing how file statuses can be obtained and
+shown (for the em(map) see section ref(MAP)):
+    verbinsert(-s4 //demo examples/statusknown.cc)

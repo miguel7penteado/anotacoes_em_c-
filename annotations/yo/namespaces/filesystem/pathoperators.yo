@@ -1,0 +1,196 @@
+In addition to the member functions various (free) operators are available:
+
+Path objects can be compared (using the tt(==, !=, <, <=, >,) and tt(>=)
+operators); the tt(/) operator returns the concatenated tt(lhs) and
+tt(rhs), separated by a directory separator. 
+
+Comparisons use lexicographical comparisons (as if by comparing the
+return values of their tt(string) members).
+
+In addition free functions are available. Some of these copy files. Those
+functions accept an optional hi(copy_options)
+tt(std::filesystem::copy_options) argument. The tt(enum class copy_options)
+defines symbolic constants that can be used to fine-tune the behavior of these
+functions. The enumeration supports bitwise operators (the symbols' values are
+shown between parentheses). It defines these symbols:
+    itemization(
+    it() When copying files:
+        itemization(
+        itt(none) (0): report an error (default behavior);
+        itt(skip_existing) (1): keep the existing file, without reporting an
+            error;
+        itt(overwrite_existing) (2): replace the existing file;
+        itt(update_existing) (4): replace the existing file only if it is
+            older than the file being copied;
+        )
+    it() When copying subdirectories:
+        itemization(
+        itt(none) (0): skip subdirectories (default behavior);
+        itt(recursive) (8): recursively copy subdirectories and their content;
+        )
+    it() When copying symlinks:
+        itemization(
+        itt(none) (0): follow symlinks (default behavior);
+        itt(copy_symlinks) (16): copy symlinks as symlinks, not as the files
+        they point to;
+        itt(skip_symlinks) (32): ignore symlinks;
+        )
+    it() To control tt(copy's) behavior itself:
+        itemization(
+        itt(none) (0): copy file content (default behavior);
+        itt(directories_only) (64): copy the directory structure, but do not
+            copy any non-directory files;
+        itt(create_symlinks) (128): instead of creating copies of files,
+            create symlinks pointing to the originals (the source path must be
+            an absolute path unless the destination path is in the current
+            directory);
+        itt(create_hard_links) (256): instead of creating copies of files,
+            create hardlinks that resolve to the same files as the originals.
+        )
+    )
+
+The following functions expect tt(path) arguments:
+    itemization(
+    ithtq(absolute)(path absolute(path const &src, path const& base))
+       (a copy of tt(src) to which, unless already available in tt(src),
+        tt(absolute(base)'s) root name and root directory are prepended.  It
+        can be called like this: tt(absolute("tmp/filename")), returning the
+        (absolute) current working directory to which tt(absolute's) argument
+        is appended as a final element, separated by a directory separator.
+        Relative path indicators (like tt(../)) are kept. The returned
+        tt(path) merely is an absolute path. If relative path indicators
+        should be removed, then use the next function;)
+
+    ithtq(canonical)(path canonical(path const &src [, error_code &ec]))
+       (returns tt(src's) canonical path. The argument tt(src) must refer to
+        an existing directory entry. Example:
+        verb(    path man{ "/usr/local/bin/../../share/man" };
+    cout << canonical(man) << '\n';    // shows:   "/usr/share/man"))
+
+    ithtq(copy)(void copy(path const &src, path const &dest [, copy_options
+        opts [, error_code &ec]]))
+       (tt(src) must exist. Copies tt(src) to tt(dest) if the tt(cp) program
+        would also succeed.
+
+       If tt(src) is a directory, and tt(dest) does not exist, tt(dest) is
+        created. Directories are recursively copied if copy options
+        tt(recursive) or tt(none) were specified;)
+
+    ithtq(copy_file)(bool copy_file(path const &src, path const &dest [,
+        copy_options opts [, error_code &ec]]))
+       (tt(src) must exist. Copies tt(src) to tt(dest) if the tt(cp) program
+        would also succeed. Symbolic links are followed. The value tt(true) is
+        returned if copying succeeded;)
+
+    ithtq(copy_symlink)(void copy_symlink(path const &src, path const &dest [,
+        error_code &ec]))
+       (creates the symlink tt(dest) as a copy of the symlink tt(src);)
+
+    ithtq(copy_directories)(bool create_directories(path const &dest [,
+        error_code &ec]))
+       (creates each component of tt(dest), unless already existing. The value
+        tt(true) is returned if no errors were encountered. See also
+        tt(create_directory) below;)
+
+    ithtq(create_directory)(bool create_directory(path const &dest [, path
+        const &existing] [, error_code &ec]))
+       (tt(dest's) parent directory must exist. This function creates
+        directory tt(dest) if it does not yet exist. Note that tt(ec.value())
+        returns zero if the directory already existed (which does not imply
+        that it was created by the user calling tt(create_directory)) or if it
+        could be created. If tt(existing) is specified, then tt(dest) receives
+        the same attributes as tt(existing). The value tt(true) is returned if
+        the directory was created, otherwise tt(false) is returned;)
+
+    ithtq(create_directory_symlink)(bool create_directory_symlink(path const
+        &dir, path const &link [, error_code &ec]))
+       (like tt(create_symlink), but should be used to create a symbolic link
+        to a directory. See also tt(create_symlink) below;)
+
+    ithtq(create_hardlink)(bool create_hardlink(path const &dest, path const
+        &link [, error_code &ec]))
+       (creates a hard link from tt(link) to tt(dest). tt(Dest) must exist;)
+
+    ithtq(create_symlink)(bool create_symlink(path const &dest, path const
+        &link [, error_code &ec]))
+       (creates a symbolic (soft) link from tt(link) to tt(dest); tt(dest)
+        does em(not) have to exist;)
+
+    itht(current_path)(path current path([error_code &ec])), tt(void
+        current_path(path const &toPath [, error_code &ec])):nl()
+       the former function returns the current working directory (cwd),
+        the latter changes the cwd to tt(toPath);
+
+    ithtq(equivalent)(bool equivalent(path const &path1, path const &path2 [,
+        error_code &ec]))
+       (tt(true) is returned if tt(path1) and tt(path2) refer to the same file
+        or directory, and have identical statuses. Both paths must exist;)
+
+    itht(exists)(bool exists(path const &dest [, error_code &ec])),
+        tt(exists(file_status status)):nl()
+       tt(true) is returned if tt(dest) exists (actually: if
+        tt(status(dest[, ec])) (see below) returns tt(true)). Note: when
+        iterating over directories, the iterator usually provides the entries'
+        statuses. In those cases calling tt(exists(iterator->status())) is
+        more efficient than calling tt(exists(*iterator));
+
+    ithtq(file_size)(std::unintmax_t file_size(path const &dest [, error_code
+        &ec]))
+       (returns the size in bytes of a regular file (or symlink destination);)
+
+    ithtq(hard_link_count)(std::uintmax_t hard_link_count(path const &dest [,
+        error_code &ec]))
+       (returns the number of hard links associated with tt(dest);)
+
+    itht(last_write_time)(file_time_type last_write_time(path const &dest [,
+        error_code &ec])), tt(void last_write_time(path const &dest,
+        file_time_type newTime [, error_code &ec])):nl()
+       the former function returns tt(dest's) last modification time;
+        the latter function changes tt(dest's) last modification time to
+        tt(newTime). The return type ti(file_time_type) is defined through a
+        tt(using) alias for tt(chrono::time_point) (cf. section
+        ref(TIMEPOINT)). The returned tt(time_point) is guaranteed to cover
+        all file time values that may be encountered in the current file
+        system. Referring to section ref(FILECLOCK): here is how
+        the time returned by tt(last_write_time) can be represented using the
+        tt(system_clock's) epoch:
+            verbinsert(//demo examples/lastwritetime.cc)
+
+    ithtq(read_symlink)(path read_symlink(path const &src [, error_code &ec]))
+       (tt(src) must refer to a symbolic link or an error is generated. The
+        link's target is returned;)
+
+    itht(remove)(bool remove(path const &dest [, error_code &ec])),
+        hi(remove_all) tt(std::uintmax_t remove_all(path const &dest [,
+        error_code &ec])):nl()
+       tt(remove) removes the file, symlink, or empty directory
+        tt(dest), returning tt(true) if tt(dest) could be removed;
+        tt(remove_all) removes tt(dest) if it's a file (or symlink); and
+        recursively removes directory tt(dest), returning the number of
+        removed entries;
+
+    ithtq(rename)(void rename(path const &src, path const &dest [, error_code
+        &ec]))
+       (renames tt(src) to tt(dest), as if using the standard bf(mv)(1)
+        command (if tt(dest) exists it is overwritten);)
+
+    ithtq(resize_file)(void resize_file(path const &src, std::uintmax_t size [,
+        error_code &ec]))
+       (tt(src's) size is changed to tt(size) as if using the standard
+        bf(truncate)(1) command;)
+
+    ithtq(space)(space_info space(path const &src [, error_code &ec]))
+       (returns information about the file system in which tt(src) is
+        located;)
+
+    ithtq(system_complete)(path system_complete(path const &src[, error_code&
+        ec]))
+       (returns the absolute path matching tt(src), using tt(current_path) as
+        its base;)
+
+    ithtq(temp_directory_path)(path temp_directory_path([error_code& ec]))
+       ( returns the path to a directory that can be used for temporary
+        files. The directory is not created, but its name is commonly
+        available from the environment variables ti(TMPDIR), tt(TMP, TEMP), or
+        tt(TEMPDIR). Otherwise, tt(/tmp) is returned.)
+    )

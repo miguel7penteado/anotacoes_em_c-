@@ -1,0 +1,71 @@
+The primary figures are stored in zip/svg.zip. These are vector graphic
+figures that can be manipulated or created by the `inkscape' program.
+
+When creating or modifying figures:
+===================================
+    cd zip
+    ./prepare
+
+    this will extract the zips in their appropriate directories.
+    
+Then 
+====
+        cd svg
+    
+    chdir to the appropriate directory and start inkscape
+    with the name of the figure to create/edit
+    
+    When a figure is created or modified, save its .svg format. A new picture
+    can be given a certain size. 
+
+>>> USE PICTURE SIZES OF 190 (w) X 280 (h) MM,
+    just a bit smaller than A4:
+
+    -> shift-ctrl d     to define the size
+    -> within the inkscape window: 5 to zoom in or use the zoom icon (3rd
+                                                    magnifying glass icon)
+
+Save the image using ctrl-S, and then 
+=====================================
+    (save .eps and .pdf formats in the svg directory)
+
+    Save As 
+
+    When saving select export object size, not the page size
+   
+    Save in the format Encapsulated Postscript (eps) and PDF
+
+    (There's no need to convert the pdf to gif: that happens at ./install
+    below) 
+
+
+Having performed all image-editing, cd back to ~/zip and run:
+=============================================================
+    ./install
+
+    This also installs the files at the ../latex and ../html directories
+
+Finally:
+========
+    ./collect
+
+    to update the zips.
+
+
+To include an image use:
+
+    figure(file)(caption)(label)
+
+E.g.,
+    figure(ptrmembers/figfilename)
+        (Person_dbase objects: Persons reached via Person *pp)
+        (PersonFig)
+
+        
+-------------------------------------
+
+Type of line: fill and stroke (ctrl shift f), stroke style
+
+Zoom out: -
+
+Zoom in:  +

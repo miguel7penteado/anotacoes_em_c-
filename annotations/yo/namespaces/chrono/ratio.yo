@@ -1,0 +1,66 @@
+Time resolutions (or em(units of time)) are essential components of time
+specifications. Time resolutions are defined through objects of the class
+    hi(ratio)tt(std::ratio). 
+    
+Before the class tt(ratio) can be used, the tthi(ratio) header file must be
+included. Instead the tt(<chrono>) header file can be included.
+
+The class tt(ratio) requires two em(template arguments). These are positive
+integral numbers surrounded by pointed brackets defining, respectively, the
+numerator and denominator of a fraction (by default the denominator equals
+1). Examples:
+        verb(    ratio<1>        - representing one; 
+    ratio<60>       - representing 60
+    ratio<1, 1000>  - representing 1/1000.)
+
+The class tt(ratio) defines two directly accessible static data
+members: tt(num)hi(ratio: num) represents its numerator, tt(den)hi(ratio: den)
+its denominator. A tt(ratio) definition by itself simply defines a certain
+amount. E.g., when executing the following program
+        verbinsert(-as4 examples/ratio.cc)
+    the text 1,200 is displayed, as that's the `amount' represented by
+tt(ratio<5, 1000>): tt(ratio) simplifies the fraction whenever possible.
+
+A fairly large number of predefined tt(ratio) types exist. They are, like
+tt(ratio) itself, defined in the standard namespace and can be used instead of
+the more cumbersome tt(ratio<x>) or tt(ratio<x, y>) specification:
+    tablecenter(8)(llcllcll)(
+    rowline()
+    row()
+    row(cell(i(yocto))  cell(10+sups(-24)) cellq()
+                     cell(i(zepto))  cell(10+sups(-21)) cellq() cells(2)())
+    rowline()
+    row()
+    row(cell(i(atto))  cell(10+sups(-18)) cell()
+        cell(i(femto)) cell(10+sups(-15)) cell()
+        cell(i(pico))  cell(10+sups(-12)))
+    row(cell(i(nano))  cell(10+sups(-9)) cell()
+        cell(i(micro)) cell(10+sups(-6)) cell()
+        cell(i(milli)) cell(10+sups(-3)))
+    row(cell(i(centi)) cell(10+sups(-2)) cell()
+        cell(i(deci))  cell(10+sups(-1)))
+    rowline()
+    row()
+    row(cell(i(deca))  cell(10+sups(1)) cell()
+        cell(i(hecto)) cell(10+sups(2)) cell()
+        cell(i(kilo))  cell(10+sups(3)))
+    row(cell(i(mega))  cell(10+sups(6)) cell()
+        cell(i(giga))  cell(10+sups(9)) cell()
+        cell(i(tera))  cell(10+sups(12)))
+    row(cell(i(peta))  cell(10+sups(15)) cell()
+        cell(i(exa))   cell(10+sups(18)))
+    rowline()
+    row()
+    row(cell(i(zetta))   cell(10+sups(21)) cell()
+        cell(i(yotta))   cell(10+sups(24)))
+    rowline()
+    )
+ (em(note:) the definitions of the types tt(yocto, zepto, zetta) and tt(yotta)
+use integral constants exceeding 64 bits. Although these constants are defined
+in bf(C++), they are not available on 64 bit or smaller architectures.)
+
+Time related ratios can very well be interpreted as fractions or multiple of
+seconds, with tt(ratio<1, 1>) representing a resolution of one second.
+
+Here is an example showing how these abbreviations can be used:
+        verbinsert(-s4 //milli examples/milli.cc)

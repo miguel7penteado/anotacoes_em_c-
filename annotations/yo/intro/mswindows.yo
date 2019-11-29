@@ -1,0 +1,8 @@
+For i(MS-Windows) i(Cygwin) hi(http://cygwin.com)
+(tlurl(http://cygwin.com)) or i(MinGW) hi(http://www.mingw.org)
+(tlurl(http://www.mingw.org)) provide the foundation
+for installing the em(Windows port) of the i(GNU) ti(g++) i(compiler).
+
+The GNU tt(g++) compiler's official home page is 
+    hi(http://gcc.gnu.org) tlurl(http://gcc.gnu.org), also containing
+information about how to install the compiler in an MS-Windows system.

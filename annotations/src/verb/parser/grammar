@@ -1,0 +1,102 @@
+//%default-actions quiet
+%filenames parser
+%scanner ../scanner/scanner.h
+
+//%baseclass-preinclude      x.h or <x.h>
+
+%token TXT VERB WS
+
+%%
+
+startrule:
+    inputtext 
+    {
+        d_out << '\n';
+    }
+;
+
+inputtext:
+    inputtext input
+|
+    input
+;
+
+input:
+    TXT
+    {
+        blankOut();
+    }        
+|
+    verb
+;
+
+verb:
+    verbTok content ')'             // outer block
+    {
+        d_blanks.clear();
+        d_out << ")\n";
+        d_verbContext = END;
+        d_scanner.verbEnds();
+    }
+;
+
+verbTok:
+    VERB
+    {
+        d_verbContext = BEGIN;        // starts an outer verb block
+        d_out << d_blanks << "verb(";
+        d_blanks.clear();
+    }
+;
+
+content:
+    content info
+|
+    // empty
+;
+
+info:
+    openPar content closePar
+|
+    TXT
+    {
+        blankOut();
+    }
+|
+    verbblock
+;
+
+openPar:
+    '('
+    {
+        blankOut();
+    }
+;
+
+closePar:
+    ')'
+    {
+        blankOut();
+    }
+;
+
+verbblock:
+    verbNest content ')'
+    {
+        blankOut();
+    }
+;
+
+verbNest:                           // not completely OK: nested verb( and
+    VERB                            // verb(\ [))] are treated identically
+    {
+        blankOut();
+    }
+;
+
+
+
+
+
+
+

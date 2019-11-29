@@ -1,4 +1,4 @@
-# - Anotações C++
+# Anotações C++
 
 As **Anotações C++** oferecem um extensivo tutorial sobre a linguagem de programação C++. 
 Elas podem ser utilizadas como livro-texto em cursos de programação C/C++.
